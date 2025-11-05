@@ -3,19 +3,19 @@
 
 ## Оглавление:
 Полезны в широком круге задач (namespace san40_u5an40.ExtraLib.Broad):
-- [Bytes]()
-- [Comparator]()
-- [Counter]()
-- [Regexes]()
-- [StringExtension]()
-- [TimerHelper]()
+- [Bytes](https://github.com/san40-u5an40/NuGet.ExtraLib/tree/main?tab=readme-ov-file#bytes)
+- [Comparator](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#comparator)
+- [Counter](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#counter)
+- [Regexes](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#regexes)
+- [StringExtension](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#stringextension)
+- [TimerHelper](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#timerhelper)
 
 Полезны при консольной разработке (namespace san40_u5an40.ExtraLib.ConsoleApp):
-- [ConsoleExtension]()
+- [ConsoleExtension](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#consoleextension)
 
 Для специфичных задач (namespace san40_u5an40.ExtraLib.Specific):
-- [Reflection]()
-- [StringCrypt]()
+- [Reflection](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#reflection)
+- [StringCrypt](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#stringcrypt)
 
 ## Bytes
 ### Назначение:
