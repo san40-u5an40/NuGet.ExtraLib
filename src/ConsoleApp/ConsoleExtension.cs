@@ -5,44 +5,47 @@
 /// </summary>
 public static class ConsoleExtension
 {
-    /// <summary>
-    /// Метод, похожий на подобные try-методы, пробующий записать строку из консоли
-    /// </summary>
-    /// <param name="input">out-параметр для хранения результирующей строки</param>
-    /// <returns>Успешность записи строки из консоли</returns>
-    public static bool TryReadLine(out string input)
+    extension(Console)
     {
-        string? temp = Console.ReadLine();
-        if (string.IsNullOrEmpty(temp))
+        /// <summary>
+        /// Метод, похожий на подобные try-методы, пробующий записать строку из консоли
+        /// </summary>
+        /// <param name="input">out-параметр для хранения результирующей строки</param>
+        /// <returns>Успешность записи строки из консоли</returns>
+        public static bool TryReadLine(out string input)
         {
-            input = string.Empty;
-            return false;
+            string? temp = Console.ReadLine();
+            if (string.IsNullOrEmpty(temp))
+            {
+                input = string.Empty;
+                return false;
+            }
+            else
+            {
+                input = temp;
+                return true;
+            }
         }
-        else
+
+        /// <summary>
+        /// Выводит переданное сообщение в цветном формате без '\n'
+        /// </summary>
+        /// <param name="msg">Сообщение для вывода</param>
+        /// <param name="color">Цвет вывода</param>
+        public static void WriteColor(string? msg, ConsoleColor color)
         {
-            input = temp;
-            return true;
+            if (string.IsNullOrEmpty(msg))
+                return;
+
+            Console.ForegroundColor = color;
+            Console.Write(msg);
+            Console.ResetColor();
         }
+
+        /// <summary>
+        /// Очищает строку от текста
+        /// </summary>
+        public static void CleanLine() =>
+            Console.Write('\r' + new string(' ', Console.WindowWidth) + '\r');
     }
-
-    /// <summary>
-    /// Выводит переданное сообщение в цветном формате без '\n'
-    /// </summary>
-    /// <param name="msg">Сообщение для вывода</param>
-    /// <param name="color">Цвет вывода</param>
-    public static void WriteColor(string? msg, ConsoleColor color)
-    {
-        if (string.IsNullOrEmpty(msg))
-            return;
-
-        Console.ForegroundColor = color;
-        Console.Write(msg);
-        Console.ResetColor();
-    }
-
-    /// <summary>
-    /// Очищает строку от текста
-    /// </summary>
-    public static void CleanLine() =>
-        Console.Write('\r' + new string(' ', Console.WindowWidth) + '\r');
 }

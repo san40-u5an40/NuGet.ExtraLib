@@ -211,7 +211,7 @@ for(int i = 0; i < int.MaxValue; i++)
 
 ## ConsoleExtension
 ### Назначение:
-Статический класс с дополнительными методами для консольного ввода-вывода.
+Статический класс с блоками расширения для консоли.
 
 ### Структура:
 Статические методы:
@@ -222,8 +222,9 @@ for(int i = 0; i < int.MaxValue; i++)
 ### Примеры кода:
 TryReadLine
 ```C#
-while (!ConsoleExtension.TryReadLine(out string? input))
-	Console.WriteLine("Некорректный ввод. Повторите попытку.");
+string result;
+while(!Console.TryReadLine(out result))
+    Console.WriteLine("Необходимо указать значение, повторите ввод!");
 ```
 
 WriteColor
@@ -231,7 +232,7 @@ WriteColor
 internal static void PrintWelcome(string name)
 {
     Console.Write("Добро пожаловать в программу, ");
-    ConsoleExtension.WriteColor(name, ConsoleColor.Red);
+    Console.WriteColor(name, ConsoleColor.Red);
     Console.Write("!\n");
 }
 ```
@@ -240,7 +241,7 @@ CleanLine
 ```C#
 Console.Write("Текст на 3 секунды...");
 Thread.Sleep(3000);
-ConsoleExtension.CleanLine();
+Console.CleanLine();
 ```
 
 ## StringCrypt
