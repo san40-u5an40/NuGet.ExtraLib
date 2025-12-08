@@ -6,6 +6,7 @@
 - [Bytes](https://github.com/san40-u5an40/NuGet.ExtraLib/tree/main?tab=readme-ov-file#bytes)
 - [Comparator](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#comparator)
 - [Counter](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#counter)
+- [MessageBox](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#messagebox)
 - [Regexes](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#regexes)
 - [StringExtension](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#stringextension)
 - [TimerHelper](https://github.com/san40-u5an40/NuGet.ExtraLib?tab=readme-ov-file#timerhelper)
@@ -89,6 +90,62 @@ for (int i = 0; i < 10; i++)
     Console.Write(cnt() + " ");
 
 // 10 11 12 13 14 15 16 17 18 19
+```
+
+## MessageBox
+### Назначение:
+Класс и набор перечислений, предназначенный для работы с окнами уведомлений в проектах, не подразумевающих работу на базе фреймворков граффический интерфейсов.
+
+### Структура:
+Статический класс `MessageBox`:
+ - Show - Метод вывода окна уведомлений. Принимает текст уведомления, заголовок окна и его тип (битовое поле `MessageBoxType`).
+
+Битовое поле MessageBoxType:
+ - Window - Типы окон:
+     - Ok - Только кнопка "Ок".
+     - OkCancel - Кнопки "Ок" и "Закрыть".
+     - AbortRetryIgnore - Кнопки "Прервать", "Повторить" и "Пропустить".
+     - YesNoCancel - Кнопки "Да", "Нет" и "Закрыть".
+     - YesNo - Кнопки "Да" и "Нет".
+     - RetryCancel - Кнопки "Повторить" и "Закрыть".
+     - CancelTryContinue - Кнопки "Закрыть", "Повторить" и "Продолжить".
+ - DefaultButton - Выбранная кнопка по умолчанию:
+     - 1 - Первая кнопка выбрана по умолчанию.
+     - 2 - Соответственно.
+     - 3 - Соответственно.
+     - 4 - Соответственно.
+ - Icon - Иконка окна уведомления:
+     - Error - Крассный знак ошибки.
+     - Question - Знак вопроса.
+     - Warning - Жёлтый знак предупреждения.
+     - Information - Синий информационный знак.
+
+Статический класс с результами окна уведомления `MessageBoxResult`:
+ - Ok.
+ - Cancel.
+ - Abort.
+ - Retry.
+ - Ignore.
+ - Yes.
+ - No.
+ - Close.
+ - Help.
+ - Try.
+ - Continue.
+
+### Примеры кода:
+```C#
+int result = MessageBox.Show(
+    "Продолжить работу программы?",
+    "Окно уведомлений",
+    MessageBoxType.Window_YesNoCancel | MessageBoxType.DefaultButton_2 | MessageBoxType.Icon_Question);
+
+if (result == MessageBoxResult.Yes)
+    Console.WriteLine("Я каменщик, работаем дальше...");
+else if (result == MessageBoxResult.No)
+    Console.WriteLine("User'а ответ!");
+else
+    return;
 ```
 
 ## Regexes
