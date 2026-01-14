@@ -4,19 +4,12 @@
 /// Атрибут для отметки пользовательского типа, требующего рефлексивный анализ
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
-public class ReflectionAttribute : Attribute
+public class ReflectionAttribute(BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly) : Attribute
 {
     /// <summary>
     /// Флаги для рефлексивного поиска
     /// </summary>
-    public BindingFlags Flags { get; private set; }
-
-    /// <summary>
-    /// Конструктор атрибута
-    /// </summary>
-    /// <param name="flags">Флаги для поиска полей, методов и конструкторов</param>
-    public ReflectionAttribute(BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly) =>
-        Flags = flags;
+    public BindingFlags Flags => flags;
 }
 
 /// <summary>
@@ -51,7 +44,7 @@ public static class Reflection
             var types = GetTypesWithAttribute(assembly);
 
             // Если в сборке таких пользовательских типов нет, то продолжение перебора сборок
-            if (types.Count() <= 0)
+            if (types.Length == 0)
                 continue;
 
             // Если такие пользовательские типы есть, то вывод информации о них и о сборке, которая их содержит
@@ -74,7 +67,7 @@ public static class Reflection
             return assembly
                 .GetTypes()
                 .Where(p => p.GetCustomAttribute(typeof(ReflectionAttribute)) != null)
-                .ToArray<Type>();
+                .ToArray();
         }
 
         // Локальная функция вывода информации о разных типах
@@ -90,7 +83,7 @@ public static class Reflection
         // Локальная функция получения флагов из свойства атрибута
         static BindingFlags GetAttributeFlags(Type type)
         {
-            ReflectionAttribute? statisticAtr = type.GetCustomAttribute(typeof(ReflectionAttribute)) as ReflectionAttribute;
+            ReflectionAttribute? statisticAtr = type.GetCustomAttribute<ReflectionAttribute>();
             return statisticAtr!.Flags;
         }
     }
@@ -104,9 +97,9 @@ public static class Reflection
         var constructors = type.GetConstructors(flags);
 
         // Подсчёт количества полей, методов и конструкторов
-        int cntFields = fields.Count();
-        int cntMethods = methods.Count();
-        int cntConstructors = constructors.Count();
+        int cntFields = fields.Length;
+        int cntMethods = methods.Length;
+        int cntConstructors = constructors.Length;
 
         // Вывод заголовка пользовательского типа
         Console.WriteLine(ZERO_LEVEL + "Тип: \"" + type.Name + "\":");
@@ -114,15 +107,15 @@ public static class Reflection
 
         // Если в пользовательском типе есть поля, вывод информации о них
         if (cntFields > 0)
-            PrintFieldsInfo(type, flags, fields, cntFields);
+            PrintFieldsInfo(fields, cntFields);
 
         // Если в пользовательском типе есть методы, вывод информации о них
         if (cntMethods > 0)
-            PrintMethodsInfo(type, flags, methods, cntMethods);
+            PrintMethodsInfo(methods, cntMethods);
 
         // Если в пользовательском типе есть конструкторы, вывод информации о них
         if (cntConstructors > 0)
-            PrintConstructorsInfo(type, flags, constructors, cntConstructors);
+            PrintConstructorsInfo(constructors, cntConstructors);
 
         // Завершение блока информации о пользовательском типе
         Console.WriteLine(ZERO_LEVEL + "Конец типа");
@@ -130,7 +123,7 @@ public static class Reflection
     }
 
     // Вывод информации о полях пользовательского типа
-    private static void PrintFieldsInfo(Type type, BindingFlags flags, FieldInfo[] fields, int cntFields)
+    private static void PrintFieldsInfo(FieldInfo[] fields, int cntFields)
     {
         Console.WriteLine(FIRST_LEVEL + "Поля:");
         Console.WriteLine(SECOND_LEVEL);
@@ -156,7 +149,7 @@ public static class Reflection
     }
 
     // Вывод информации о методах пользовательского типа
-    private static void PrintMethodsInfo(Type type, BindingFlags flags, MethodInfo[] methods, int cntMethods)
+    private static void PrintMethodsInfo(MethodInfo[] methods, int cntMethods)
     {
         Console.WriteLine(FIRST_LEVEL + "Методы:");
         Console.WriteLine(SECOND_LEVEL);
@@ -167,7 +160,7 @@ public static class Reflection
             Console.WriteLine(THIRD_LEVEL + "Атрибуты: " + method.Attributes);
             Console.WriteLine(THIRD_LEVEL + "Возвращаемый тип: " + method.ReturnParameter);
 
-            if (method.GetParameters().Count() > 0)
+            if (method.GetParameters().Length > 0)
             {
                 string[] paramsInfo = method
                     .GetParameters()
@@ -185,7 +178,7 @@ public static class Reflection
     }
 
     // Вывод информации о конструкторах пользовательского типа
-    private static void PrintConstructorsInfo(Type type, BindingFlags flags, ConstructorInfo[] constructors, int cntConstructors)
+    private static void PrintConstructorsInfo(ConstructorInfo[] constructors, int cntConstructors)
     {
         Console.WriteLine(FIRST_LEVEL + "Конструкторы:");
         Console.WriteLine(SECOND_LEVEL);
@@ -195,7 +188,7 @@ public static class Reflection
             Console.WriteLine(SECOND_LEVEL + "Имя: " + constructor.Name);
             Console.WriteLine(THIRD_LEVEL + "Атрибуты: " + constructor.Attributes);
 
-            if (constructor.GetParameters().Count() > 0)
+            if (constructor.GetParameters().Length > 0)
             {
                 string[] paramsInfo = constructor
                     .GetParameters()

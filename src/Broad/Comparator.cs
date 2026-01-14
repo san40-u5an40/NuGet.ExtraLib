@@ -20,8 +20,8 @@ public static class Comparator
 
 file class KeySelectorComparer<TSource, TKey> : IComparer<TSource>
 {
-    private Func<TSource, TKey?> keySelector;
-    private Comparer<TKey?> comparer = Comparer<TKey?>.Default;
+    private readonly Func<TSource, TKey?> keySelector;
+    private readonly Comparer<TKey?> comparer = Comparer<TKey?>.Default;
 
     internal KeySelectorComparer(Func<TSource, TKey?> keySelector) => this.keySelector = keySelector;
 

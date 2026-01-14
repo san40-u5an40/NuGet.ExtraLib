@@ -16,8 +16,7 @@ public static class Regexes
         if (string.IsNullOrEmpty(text))
             return string.Empty;
 
-        if (replacesStr == null)
-            replacesStr = string.Empty;
+        replacesStr ??= string.Empty;
 
         return Regex.Replace(text,
                              @"\b\S+?@\w+?\.\w+?\b",
