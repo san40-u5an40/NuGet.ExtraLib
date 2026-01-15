@@ -46,5 +46,5 @@ public class Result<TSuccess, TFailure>
     /// <param name="failure">Данные невалидного результата</param>
     /// <returns>Объект, хранящий данные результата</returns>
     public static Result<TSuccess, TFailure> CreateFailure(TFailure failure) =>
-        new(true, null, failure);
+        new(false, null, failure);
 }
