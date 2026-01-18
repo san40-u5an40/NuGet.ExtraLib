@@ -1,4 +1,4 @@
-﻿namespace san40_u5an40.ExtraLib.Broad;
+﻿namespace san40_u5an40.ExtraLib.Broad.Patterns;
 
 /// <summary>
 /// Обобщённый класс для реализации Result-паттерна
@@ -6,9 +6,7 @@
 /// <typeparam name="TSuccess">Тип данных, хранящихся в Value при валидном результате</typeparam>
 /// <typeparam name="TFailure">Тип данных, хранящийся в Error при невалидном результате</typeparam>
 /// <exception cref="InvalidOperationException">Обращение к сведеньям об ошибке при валидном результате и наоборот не допустимо</exception>
-public class Result<TSuccess, TFailure>
-    where TSuccess : class
-    where TFailure : class
+public class Result<TSuccess, TFailure> : IValidable<TSuccess, TFailure>
 {
     private readonly bool isValid;
     private readonly TSuccess? success;
@@ -38,7 +36,7 @@ public class Result<TSuccess, TFailure>
     /// <param name="success">Данные валидного результата</param>
     /// <returns>Объект, хранящий данные результата</returns>
     public static Result<TSuccess, TFailure> CreateSuccess(TSuccess success) =>
-        new(true, success, null);
+        new(true, success, default);
 
     /// <summary>
     /// Статический метод создания невалидного результата
@@ -46,5 +44,5 @@ public class Result<TSuccess, TFailure>
     /// <param name="failure">Данные невалидного результата</param>
     /// <returns>Объект, хранящий данные результата</returns>
     public static Result<TSuccess, TFailure> CreateFailure(TFailure failure) =>
-        new(false, null, failure);
+        new(false, default, failure);
 }
