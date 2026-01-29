@@ -3,7 +3,7 @@
 /// <summary>
 /// Класс со вспомогательными методами по работе в консоли
 /// </summary>
-public static class ConsoleExtension
+public static class ConsoleExtensions
 {
     extension(Console)
     {
@@ -39,6 +39,26 @@ public static class ConsoleExtension
 
             Console.ForegroundColor = color;
             Console.Write(msg);
+            Console.ResetColor();
+        }
+
+        /// <summary>
+        /// Выводит переданное сообщение в цветном формате с '\n'
+        /// </summary>
+        /// <param name="msg">Сообщение для вывода</param>
+        /// <param name="color">Цвет вывода</param>
+        public static void WriteColorLine(string? msg, ConsoleColor color)
+        {
+            char newLine = '\n';
+
+            if (string.IsNullOrEmpty(msg))
+            {
+                Console.Write(newLine);
+                return;
+            }
+
+            Console.ForegroundColor = color;
+            Console.Write(msg + newLine);
             Console.ResetColor();
         }
 

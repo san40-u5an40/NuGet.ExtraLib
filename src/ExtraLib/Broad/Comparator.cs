@@ -33,4 +33,3 @@ file class KeySelectorComparer<TSource, TKey> : IComparer<TSource>
         return comparer.Compare(keySelector(obj1), keySelector(obj2));
     }
 }
-

@@ -8,9 +8,9 @@
 /// <typeparam name="TError">Тип ошибки, которую возвращает цепочка при невалидном результате</typeparam>
 /// <param name="startData">Начальные данные цепочки</param>
 public class Chain<TInputData, TOutputData, TError>(TInputData startData)
-    where TInputData : class
-    where TOutputData : class
-    where TError : class
+    where TInputData : notnull
+    where TOutputData : notnull
+    where TError : notnull
 {
     private LinkedList<IInvokable<TError>> operations = new();
 
@@ -21,28 +21,39 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
     /// <param name="func">Вызываемая функция</param>
     /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, IValidable<TOutput, TError>> func)
-        where TInput : class
-        where TOutput : class
-    {
-        var operation = new OperationInfo<TInput, TOutput, TError>(func);
+    public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func));
 
-        ThrowIfInvalidOperation(operation);
-        operations.AddLast(operation);
+    /// <summary>
+    /// Метод для добавления функции/метода в цепочку с out-параметром
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="func">Вызываемая функция</param>
+    /// <param name="readyable">Возвращаемое функцией значение в формате Readyable</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> readyable)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, out readyable));
 
-        return this;
-    }
-
-    // Проверка добавляемой функции на валидность
-    private void ThrowIfInvalidOperation<TInput, TOutput>(OperationInfo<TInput, TOutput, TError> operation)
-        where TInput : class
-        where TOutput : class
+    // Общая часть для двух перегрузок метода AddMethod
+    // Проверяет операцию на валидность
+    // И если всё хорошо, то добавляет её в конец списка
+    private Chain<TInputData, TOutputData, TError> ThrowIfInvalidAndAddLast<TInput, TOutput>(OperationInfo<TInput, TOutput, TError> operation)
+        where TInput : notnull
+        where TOutput : notnull
     {
         Type lastOutputType = operations.Count > 0 ? operations.Last!.Value.OutputType : startData.GetType();
         Type operationInputType = operation.InputType;
 
         if (lastOutputType != operationInputType)
             throw new FormatException($"Входные параметры для операции \"{operation.Name}\" не соответствуют требованиям!");
+
+        operations.AddLast(operation);
+        return this;
     }
 
     /// <summary>
@@ -53,7 +64,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     /// - Если валидный, то свойство Value хранит TOutputData.<br>
     /// - Если невалидный, то в свойстве Error хранится TError.
     /// </returns>
-    public IValidable<TOutputData, TError> Execute()
+    public Result<TOutputData, TError> Execute()
     {
         ThrowIfInvalidList();
 

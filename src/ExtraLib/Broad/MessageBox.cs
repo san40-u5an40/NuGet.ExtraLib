@@ -1,14 +1,27 @@
 ﻿namespace san40_u5an40.ExtraLib.Broad;
 
+/// <summary>
+/// Окно с сообщением
+/// </summary>
 public static class MessageBox
 {
-    [DllImport("user32.dll", CharSet = CharSet.Unicode, EntryPoint = "MessageBoxW")]
+    [DllImport("user32.dll", EntryPoint = "MessageBoxW", CharSet = CharSet.Unicode)]
     private static extern int Show(IntPtr hWnd, string text, string caption, uint type);
 
+    /// <summary>
+    /// Метод показа окна с сообщением
+    /// </summary>
+    /// <param name="text">Текст, выводимый в окне</param>
+    /// <param name="caption">Заголовок окна</param>
+    /// <param name="type">Настройка параметров окна</param>
+    /// <returns>Значение, выбранное пользователем</returns>
     public static int Show(string text, string caption, MessageBoxType type = 0x0000_0000) =>
         Show(IntPtr.Zero, text, caption, (uint)type);
 }
 
+/// <summary>
+/// Битовое поле, хранящее настройки для окна с сообщением
+/// </summary>
 [Flags]
 public enum MessageBoxType : uint
 {
@@ -31,6 +44,9 @@ public enum MessageBoxType : uint
     DefaultButton_4 = 0x0000_0300,
 }
 
+/// <summary>
+/// Ввод, указанный пользователем в окне
+/// </summary>
 public static class MessageBoxResult
 {
     public const int Ok = 1;

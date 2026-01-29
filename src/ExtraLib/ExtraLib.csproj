@@ -10,24 +10,24 @@
     <Authors>san40_u5an40</Authors>
     <PackageIcon>icon.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageOutputPath>..\..\_Releases</PackageOutputPath>
+    <PackageOutputPath>..\..\..\_Releases</PackageOutputPath>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>2.0.0</Version>
+    <Version>3.0.0</Version>
     <Description>Extra Libraries for development on .NET</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\icons\icon.png">
+    <None Include="..\..\icons\icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="..\LICENSE">
+    <None Include="..\..\LICENSE">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="..\README.md">
+    <None Include="..\..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

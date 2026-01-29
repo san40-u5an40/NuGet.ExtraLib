@@ -3,7 +3,7 @@
 /// <summary>
 /// Статический класс с методами расширения для строк
 /// </summary>
-public static class StringExtension
+public static class StringExtensions
 {
     /// <summary>
     /// Метод сокращающий строку до указанной длины
@@ -22,5 +22,27 @@ public static class StringExtension
             return (input, charsLength);
         else
             return (input[0..(input.Length + charsLength - 3)] + "...", 0);
+    }
+
+    /// <summary>
+    /// Заменяет старое значение на новое, пока в тексте содержится старое значение (удобно для удаления повторяющихся символов)
+    /// </summary>
+    /// <param name="text">Исходный текст, в котором требуется заменить символы</param>
+    /// <param name="oldValue">Старое значение</param>
+    /// <param name="newValue">Новое значение</param>
+    /// <returns>Текст со всеми осуществлёнными заменами</returns>
+    public static string ReplaceWhileContain(this string text, string oldValue, string newValue)
+    {
+        string pre = oldValue;
+        bool isReplacedAll = false;
+
+        while (!isReplacedAll)
+        {
+            text = text.Replace(oldValue, newValue);
+            isReplacedAll = text == pre;
+            pre = text;
+        }
+
+        return text;
     }
 }
