@@ -33,7 +33,7 @@ public static class StringExtensions
     /// <returns>Текст со всеми осуществлёнными заменами</returns>
     public static string ReplaceWhileContain(this string text, string oldValue, string newValue)
     {
-        string pre = oldValue;
+        string pre = text;
         bool isReplacedAll = false;
 
         while (!isReplacedAll)

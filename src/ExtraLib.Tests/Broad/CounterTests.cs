@@ -139,4 +139,90 @@ public class CounterTests
 
         Assert.That(count(), Is.EqualTo(endValue));
     }
+
+    [Test]
+    public void SetValidator_OnValidValue_NotThrow()
+    {
+        counter1 += 10;
+        counter1.SetValidator(p => p == 10);
+    }
+
+    [Test]
+    public void Increment_OnNotValidValue_ThrowCounterNotValidValueException()
+    {
+        counter1 += 10;
+        counter1.SetValidator(p => p == 10);
+
+        Assert.Throws<CounterNotValidValueException>(() => counter1++);
+    }
+
+    [Test]
+    public void SetValidator_OnNotValidValue_ThrowCounterNotValidValueException()
+    {
+        Assert.Throws<CounterNotValidValueException>(() => counter1.SetValidator(p => p == 10));
+    }
+
+    [Test]
+    public void Increment_LongMaxValue_ThrowCounterNotValidValueException()
+    {
+        Counter counter = new(long.MaxValue);
+
+        Assert.Throws<CounterNotValidValueException>(() => counter++);
+    }
+
+    [Test]
+    public void Decrement_LongMinValue_ThrowCounterNotValidValueException()
+    {
+        Counter counter = new(long.MinValue);
+
+        Assert.Throws<CounterNotValidValueException>(() => counter--);
+    }
+
+    [Test]
+    public void Increment_LongMaxValueMinusOne_NotThrow()
+    {
+        Counter counter = new(long.MaxValue - 1);
+
+        Assert.DoesNotThrow(() => counter++);
+    }
+
+    [Test]
+    public void Decrement_longMinValuePlusOne_NotThrow()
+    {
+        Counter counter = new(long.MinValue + 1);
+
+        Assert.DoesNotThrow(() => counter--);
+    }
+
+    [Test]
+    public void IncrementOnThree_LongMaxValueMinusTwo_ThrowCounterNotValidValueException()
+    {
+        Counter counter = new(long.MaxValue - 2);
+
+        Assert.Throws<CounterNotValidValueException>(() => counter += 3);
+    }
+
+    [Test]
+    public void DecrementOnThree_LongMinValuePlusTwo_ThrowCounterNotValidValueException()
+    {
+        Counter counter = new(long.MinValue + 2);
+
+        Assert.Throws<CounterNotValidValueException>(() => counter -= 3);
+    }
+
+    [Test]
+    public void IncrementOnThree_LongMaxValueMinusThree_NotThrow()
+    {
+        Counter counter = new(long.MaxValue - 3);
+
+        Assert.DoesNotThrow(() => counter += 3);
+    }
+
+    [Test]
+    public void DecrementOnThree_LongMinValuePlusThree_NotThrow()
+    {
+        Counter counter = new(long.MinValue + 3);
+
+        Assert.DoesNotThrow(() => counter -= 3);
+    }
 }

@@ -1,4 +1,4 @@
-﻿using StringResultFromTests = san40_u5an40.ExtraLib.Broad.Patterns.Result<string, string>;
+﻿using StringResultForTests = san40_u5an40.ExtraLib.Broad.Patterns.Result<string, string>;
 
 namespace ExtraLib.Tests.Broad.Patterns;
 
@@ -10,7 +10,7 @@ public static class ResultTests
     [Test]
     public static void GetValue_FromNonValidResult_ThrowInvalidOperationException()
     {
-        var result = StringResultFromTests.CreateFailure(string.Empty);
+        var result = StringResultForTests.CreateFailure(string.Empty);
 
         Assert.Throws<InvalidOperationException>(() => { string returned = result.Value; });
     }
@@ -18,7 +18,7 @@ public static class ResultTests
     [Test]
     public static void GetError_FromValidResult_ThrowInvalidOperationException()
     {
-        var result = StringResultFromTests.CreateSuccess(string.Empty);
+        var result = StringResultForTests.CreateSuccess(string.Empty);
 
         Assert.Throws<InvalidOperationException>(() => { string returned = result.Error; });
     }
@@ -26,7 +26,7 @@ public static class ResultTests
     [Test]
     public static void GetIsValid_FromValidResult_ReturnTrue()
     {
-        var result = StringResultFromTests.CreateSuccess(string.Empty);
+        var result = StringResultForTests.CreateSuccess(string.Empty);
         bool actual = result.IsValid;
 
         Assert.That(actual, Is.True);
@@ -35,7 +35,7 @@ public static class ResultTests
     [Test]
     public static void GetIsValid_FromNonValidResult_ReturnFalse()
     {
-        var result = StringResultFromTests.CreateFailure(string.Empty);
+        var result = StringResultForTests.CreateFailure(string.Empty);
         bool actual = result.IsValid;
 
         Assert.That(actual, Is.False);
@@ -44,7 +44,7 @@ public static class ResultTests
     [Test]
     public static void GetValue_FromValidResult_ReturnValue()
     {
-        var result = StringResultFromTests.CreateSuccess(STRING_VALID);
+        var result = StringResultForTests.CreateSuccess(STRING_VALID);
         string actual = result.Value;
 
         Assert.That(actual, Is.EqualTo(STRING_VALID));
@@ -53,7 +53,7 @@ public static class ResultTests
     [Test]
     public static void GetError_FromNonValidResult_ReturnError()
     {
-        var result = StringResultFromTests.CreateFailure(STRING_NOT_VALID);
+        var result = StringResultForTests.CreateFailure(STRING_NOT_VALID);
         string actual = result.Error;
 
         Assert.That(actual, Is.EqualTo(STRING_NOT_VALID));
@@ -64,7 +64,7 @@ public static class ResultTests
     {
         Readyable<string> readyable = new();
 
-        StringResultFromTests.CreateSuccess(STRING_VALID, readyable);
+        StringResultForTests.CreateSuccess(STRING_VALID, readyable);
 
         Assert.That(readyable.IsReady, Is.True);
     }
@@ -74,7 +74,7 @@ public static class ResultTests
     {
         Readyable<string> readyable = new();
 
-        StringResultFromTests.CreateFailure(string.Empty, readyable);
+        StringResultForTests.CreateFailure(string.Empty, readyable);
 
         Assert.That(readyable.IsReady, Is.False);
     }
@@ -84,7 +84,7 @@ public static class ResultTests
     {
         Readyable<string> readyable = new();
 
-        StringResultFromTests.CreateFailure(string.Empty, readyable);
+        StringResultForTests.CreateFailure(string.Empty, readyable);
 
         Assert.Throws<ReadyableException>(() => { var value = readyable.Value; });
     }
@@ -94,7 +94,7 @@ public static class ResultTests
     {
         Readyable<string> readyable = new();
 
-        StringResultFromTests.CreateSuccess(STRING_VALID, readyable);
+        StringResultForTests.CreateSuccess(STRING_VALID, readyable);
 
         Assert.That(readyable.Value, Is.EqualTo(STRING_VALID));
     }
@@ -106,7 +106,7 @@ public static class ResultTests
         readyable.Value = STRING_VALID;
         ((IReadyable<string>)readyable).ToReady();
 
-        Assert.Throws<ReadyableException>(() => { StringResultFromTests.CreateSuccess(STRING_VALID, readyable); });
+        Assert.Throws<ReadyableException>(() => { StringResultForTests.CreateSuccess(STRING_VALID, readyable); });
     }
 
     [Test]
@@ -115,6 +115,6 @@ public static class ResultTests
         Readyable<string> readyable = new();
         ((IReadyable<string>)readyable).ToNeverBeReady();
 
-        Assert.Throws<ReadyableException>(() => { StringResultFromTests.CreateFailure(STRING_NOT_VALID, readyable); });
+        Assert.Throws<ReadyableException>(() => { StringResultForTests.CreateFailure(STRING_NOT_VALID, readyable); });
     }
 }

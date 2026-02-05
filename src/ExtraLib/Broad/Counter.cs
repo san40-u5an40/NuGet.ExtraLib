@@ -1,16 +1,61 @@
 ﻿namespace san40_u5an40.ExtraLib.Broad;
 
 /// <summary>
+/// Перечисление, отражающее тип операции, производимой над счётчиком
+/// </summary>
+public enum CounterOperationType : ushort
+{
+    SetValidator,
+    Increment,
+    Decrement,
+}
+
+/// <summary>
+/// Исключение о невалидном значении счётчика
+/// </summary>
+public class CounterNotValidValueException : Exception
+{
+    public CounterNotValidValueException(Counter counter, CounterOperationType operationType, long step, string? message = null)
+        : base(message) =>
+        (Counter, OperationType, Step) = (counter, operationType, step);
+
+    /// <summary>
+    /// Счётчик, с которым связано исключение
+    /// </summary>
+    public Counter Counter { get; private init; }
+
+    /// <summary>
+    /// Операция, производимая над счётчиком
+    /// </summary>
+    public CounterOperationType OperationType { get; private init; }
+
+    /// <summary>
+    /// Шаг, на который изменялся счётчик
+    /// </summary>
+    public long Step { get; private init; }
+}
+
+/// <summary>
+/// Делегат для подписки на обновления счётчика
+/// </summary>
+/// <param name="type">Тип операции, производимый над счётчиком</param>
+/// <param name="step">Количество, на которое изменился счётчик</param>
+/// <param name="counter">Источник изменений</param>
+public delegate void CounterEventHandler(CounterOperationType type, long step, Counter counter);
+
+/// <summary>
 /// Счётчик
 /// </summary>
-public class Counter(double value = 0, string? name = null) : ICloneable, IComparable<Counter>
+public class Counter(long value = 0, string? name = null) : ICloneable, IComparable<Counter>
 {
     private static int randValueForHashCode = new Random().Next(int.MinValue, int.MaxValue);
+    private HashSet<CounterEventHandler> observers = [];
+    private Predicate<long>? isValid = null;
 
     /// <summary>
     /// Значение счётчика
     /// </summary>
-    public double Value => value;
+    public long Value => value;
 
     /// <summary>
     /// Имя счётчика
@@ -18,57 +63,112 @@ public class Counter(double value = 0, string? name = null) : ICloneable, ICompa
     public string Name => name ?? string.Empty;
 
     /// <summary>
+    /// Установка валидатора допустимых значений
+    /// </summary>
+    /// <param name="isValid">Метод для определения валидности значения</param>
+    public Counter SetValidator(Predicate<long> isValid)
+    {
+        this.isValid = isValid;
+
+        if (!this.isValid(Value))
+            throw new CounterNotValidValueException(this, CounterOperationType.SetValidator, default);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Добавление и удаление обработчиков операций, осуществляемых над счётчиком
+    /// </summary>
+    public event CounterEventHandler Handler
+    {
+        add => observers.Add(value);
+        remove
+        {
+            if (!observers.Contains(value))
+                throw new ArgumentException("Данный делегат не содержится в коллекции!");
+            observers.Remove(value);
+        }
+    }
+
+    /// <summary>
     /// Инкрементирование счётчика со стандартным шагом
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">Превышение допустимого максимального значения</exception>
+    /// <exception cref="CounterNotValidValueException">Превышение допустимого максимального значения</exception>
     public Counter Increment()
     {
-        if (value == double.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(value));
+        long newValue = value + 1;
 
-        value++;
-        return this;
+        if (long.MaxValue - 1 >= value && (isValid is null ? true : isValid(newValue)))
+        {
+            value = newValue;
+            UpdateObservers(CounterOperationType.Increment, 1);
+            return this;
+        }
+        else
+            throw new CounterNotValidValueException(this, CounterOperationType.Increment, 1);
     }
 
     /// <summary>
     /// Инкрементирование счётчика с указанным шагом
     /// </summary>
     /// <param name="step">Шаг увеличения счётчика</param>
-    /// <exception cref="ArgumentOutOfRangeException">Превышение допустимого максимального значения</exception>
-    public Counter Increment(double step)
+    /// <exception cref="CounterNotValidValueException">Превышение допустимого максимального значения</exception>
+    public Counter Increment(long step)
     {
-        if (value + step > double.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(value));
+        long newValue = value + step;
 
-        value += step;
-        return this;
+        if (long.MaxValue - step >= value && (isValid is null ? true : isValid(newValue)))
+        {
+            value = newValue;
+            UpdateObservers(CounterOperationType.Increment, step);
+            return this;
+        }
+        else
+            throw new CounterNotValidValueException(this, CounterOperationType.Increment, step);
     }
 
     /// <summary>
     /// Декрементирование счётчика со стандартным шагом
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">Значение перешло минимально допустимый порог</exception>
+    /// <exception cref="CounterNotValidValueException">Значение перешло минимально допустимый порог</exception>
     public Counter Decrement()
     {
-        if (value == double.MinValue)
-            throw new ArgumentOutOfRangeException(nameof(value));
+        long newValue = value - 1;
 
-        value--;
-        return this;
+        if (long.MinValue + 1 <= value && (isValid is null ? true : isValid(newValue)))
+        {
+            value = newValue;
+            UpdateObservers(CounterOperationType.Decrement, 1);
+            return this;
+        }
+        else
+            throw new CounterNotValidValueException(this, CounterOperationType.Decrement, 1);
     }
 
     /// <summary>
     /// Декрементирование счётчика с указанным шагом
     /// </summary>
     /// <param name="step">Шаг уменьшения счётчика</param>
-    /// <exception cref="ArgumentOutOfRangeException">Значение перешло минимально допустимый порог</exception>
-    public Counter Decrement(double step)
+    /// <exception cref="CounterNotValidValueException">Значение перешло минимально допустимый порог</exception>
+    public Counter Decrement(long step)
     {
-        if (value - step < double.MinValue)
-            throw new ArgumentOutOfRangeException(nameof(value));
+        long newValue = value - step;
 
-        value -= step;
-        return this;
+        if (long.MinValue + step <= value && (isValid is null ? true : isValid(newValue)))
+        {
+            value = newValue;
+            UpdateObservers(CounterOperationType.Decrement, step);
+            return this;
+        }
+        else
+            throw new CounterNotValidValueException(this, CounterOperationType.Decrement, step);
+    }
+
+    // Вспомогательный метод для оповещения наблюдателей
+    private void UpdateObservers(CounterOperationType type, long value)
+    {
+        foreach (CounterEventHandler action in observers)
+            action(type, value, this);
     }
 
     /// <summary>
@@ -124,14 +224,14 @@ public class Counter(double value = 0, string? name = null) : ICloneable, ICompa
     /// Перегрузка оператора, увеличивающая значение счётчика на указанный шаг
     /// </summary>
     /// <param name="number">Шаг увеличения счётчика</param>
-    public void operator +=(double number) =>
+    public void operator +=(long number) =>
         Increment(number);
 
     /// <summary>
     /// Перегрузка оператора, уменьшающая значение счётчика на указанный шаг
     /// </summary>
     /// <param name="number">Шаг уменьшения счётчика</param>
-    public void operator -=(double number) =>
+    public void operator -=(long number) =>
         Decrement(number);
 
     /// <summary>
@@ -156,7 +256,7 @@ public class Counter(double value = 0, string? name = null) : ICloneable, ICompa
     /// <param name="counter">Счётчик</param>
     /// <param name="number">Шаг увеличения</param>
     /// <returns>Увеличенный счётчик</returns>
-    public static Counter operator +(Counter counter, double number) =>
+    public static Counter operator +(Counter counter, long number) =>
         counter.Increment(number);
 
     /// <summary>
@@ -165,7 +265,7 @@ public class Counter(double value = 0, string? name = null) : ICloneable, ICompa
     /// <param name="counter">Счётчик</param>
     /// <param name="number">Шаг уменьшения</param>
     /// <returns>Уменьшенный счётчик</returns>
-    public static Counter operator -(Counter counter, double number) =>
+    public static Counter operator -(Counter counter, long number) =>
         counter.Decrement(number);
 
     /// <summary>
@@ -249,7 +349,7 @@ public class Counter(double value = 0, string? name = null) : ICloneable, ICompa
     /// <param name="value">Значение счётчика</param>
     /// <param name="name">Имя счётчика</param>
     /// <returns>Счётчик с указанными значениями</returns>
-    public static Counter CreateCounter(double value, string? name = null) =>
+    public static Counter CreateCounter(long value, string? name = null) =>
         new Counter(value, name);
 
     /// <summary>
@@ -257,6 +357,6 @@ public class Counter(double value = 0, string? name = null) : ICloneable, ICompa
     /// </summary>
     /// <param name="startValue">Стартовое значение счётчика</param>
     /// <returns>Функция, вызов которой возвращает значение, которое затем будет инкрементированно</returns>
-    public static Func<double> CreateClosuredCounter(double startValue) =>
+    public static Func<long> CreateClosuredCounter(long startValue) =>
         () => startValue++;
 }

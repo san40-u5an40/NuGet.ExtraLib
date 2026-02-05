@@ -18,7 +18,7 @@ public static class ComparatorTests
     {
         int pre = int.MinValue;
 
-        for (int i = 1; i < collection.Length; i++)
+        for (int i = 0; i < collection.Length; i++)
         {
             if (collection[i].Result < pre)
                 return false;
