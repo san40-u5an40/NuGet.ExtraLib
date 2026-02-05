@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>san40_u5an40.$(AssemblyName)</PackageId>
     <Title>Extra Libraries</Title>
@@ -13,9 +14,16 @@
     <PackageOutputPath>..\..\..\_Releases</PackageOutputPath>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
     <Description>Extra Libraries for development on .NET</Description>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <ItemGroup>
