@@ -1,4 +1,6 @@
-﻿namespace ExtraLib.Tests.Broad.Patterns;
+﻿using System.Threading;
+
+namespace ExtraLib.Tests.Broad.Patterns;
 
 public static class AsyncChainTests
 {
@@ -28,7 +30,8 @@ public static class AsyncChainTests
             .ExecuteAsync();
 
         Assert.That(asyncChainResult.IsValid, Is.False);
-        Assert.That(asyncChainResult.Error, Is.EqualTo(ERROR));
+        Assert.That(asyncChainResult.Error.Type, Is.EqualTo(InvalidAsyncChainResultType.NotValidMethodResult));
+        Assert.That(asyncChainResult.Error.Value, Is.EqualTo(ERROR));
     }
 
     [Test]
@@ -43,6 +46,39 @@ public static class AsyncChainTests
         Assert.That(readyable.Value, Is.EqualTo(DOCUMENT_NUMBER));
     }
 
+    [Test]
+    public static async Task RequestCancellationToken_ForAsyncChain_ReturnInvalidResultWithCancellationTokenRequestedType()
+    {
+        CancellationTokenSource cancellationTokenSource = new();
+        var asyncChain = new AsyncChain<string, int, string>(DOCUMENT_PATH, cancellationTokenSource.Token)
+            .AddMethod<string, int>(GetNumberFromDocumentAsync)
+            .AddMethod<int, int>(IncrementAsync);
+
+        cancellationTokenSource.Cancel();
+        var result = await asyncChain.ExecuteAsync();
+
+        Assert.That(result.IsValid, Is.False);
+        Assert.That(result.Error.Type, Is.EqualTo(InvalidAsyncChainResultType.CancellationTokenRequested));
+        Assert.That(result.Error.Value, Is.Null);
+    }
+
+    [Test]
+    public static async Task RequestCancellationToken_ForAsyncChainMethod_ReturnInvalidResultWithNotValidMethodResultType()
+    {
+        CancellationTokenSource cancellationTokenSource = new();
+        var asyncChain = new AsyncChain<int, int, string>(int.RandomValue, cancellationTokenSource.Token)
+            .AddMethod<int, int>(IncrementWithTokenAsync);
+
+        var cancelTask = Wait5MillisecondsAndCancel(cancellationTokenSource);
+        var executeTask = asyncChain.ExecuteAsync();
+        await Task.WhenAll(executeTask, cancelTask);
+        var result = executeTask.Result;
+
+        Assert.That(result.IsValid, Is.False);
+        Assert.That(result.Error.Type, Is.EqualTo(InvalidAsyncChainResultType.NotValidMethodResult));
+        Assert.That(result.Error.Value, Is.Not.Null);
+    }
+
     private static async Task<Result<int, string>> GetNumberFromDocumentAsync(string path)
     {
         string content = await File.ReadAllTextAsync(path);
@@ -55,4 +91,22 @@ public static class AsyncChainTests
         Result<int, string>.CreateSuccess(++number);
     private static async Task<Result<int, string>> NotValidResultIncrementAsync(int number) =>
         Result<int, string>.CreateFailure(ERROR);
+
+    private static async Task Wait5MillisecondsAndCancel(CancellationTokenSource cancellationTokenSource)
+    {
+        await Task.Delay(5);
+        cancellationTokenSource.Cancel();
+    }
+    private static async Task<Result<int, string>> IncrementWithTokenAsync(int number, CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Result<int, string>.CreateFailure("Операция прервана по токену");
+
+        await Task.Delay(100);
+
+        if (cancellationToken.IsCancellationRequested)
+            return Result<int, string>.CreateFailure("Операция прервана по токену");
+
+        return Result<int, string>.CreateSuccess(++number);
+    }
 }

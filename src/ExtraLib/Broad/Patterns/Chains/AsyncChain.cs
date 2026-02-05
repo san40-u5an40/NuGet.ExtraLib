@@ -1,5 +1,7 @@
 ﻿namespace san40_u5an40.ExtraLib.Broad.Patterns;
 
+// А если вместе с такими функциями содержится и сам токен, то он будет передан в InvokeAsync
+
 /// <summary>
 /// Цепочка вызова асинхронных операций, передающая указанные данные
 /// </summary>
@@ -7,7 +9,7 @@
 /// <typeparam name="TOutputData">Данные, которые цепочка возвращает в самом конце</typeparam>
 /// <typeparam name="TError">Тип ошибки, которую возвращает цепочка при невалидном результате</typeparam>
 /// <param name="startData">Начальные данные цепочки</param>
-public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData)
+public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, CancellationToken? cancellationToken = null)
     where TInputData : notnull
     where TOutputData : notnull
     where TError : notnull
@@ -19,25 +21,50 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData)
     /// </summary>
     /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
     /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
-    /// <param name="asyncFunc">Вызываемая функция</param>
+    /// <param name="funcWithoutCancellationToken">Вызываемая функция</param>
     /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Task<Result<TOutput, TError>>> asyncFunc)
+    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken)
         where TInput : notnull
         where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(asyncFunc));
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithoutCancellationToken));
+
+    /// <summary>
+    /// Метод для добавления асинхронных функции или метода в цепочку
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="funcWithCancellationToken">Вызываемая функция</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, CancellationToken, Task<Result<TOutput, TError>>> funcWithCancellationToken)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken));
 
     /// <summary>
     /// Метод для добавления асинхронных функции или метода в цепочку, принимающий out-параметр
     /// </summary>
     /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
     /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
-    /// <param name="asyncFunc">Вызываемая функция</param>
-    /// <param name="readyable">Возвращаемое функцией значение в формате Readyable</param>
+    /// <param name="funcWithoutCancellationToken">Вызываемая функция</param>
+    /// <param name="outParameter">Возвращаемое функцией значение в формате Readyable</param>
     /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Task<Result<TOutput, TError>>> asyncFunc, out Readyable<TOutput> readyable)
+    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, out Readyable<TOutput> outParameter)
         where TInput : notnull
         where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(asyncFunc, out readyable));
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithoutCancellationToken, out outParameter));
+
+    /// <summary>
+    /// Метод для добавления асинхронных функции или метода в цепочку, принимающий out-параметр
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="funcWithCancellationToken">Вызываемая функция</param>
+    /// <param name="outParameter">Возвращаемое функцией значение в формате Readyable</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, CancellationToken, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken, out outParameter));
 
     // Общая часть для двух перегрузок метода AddMethod
     // Проверяет операцию на валидность
@@ -62,9 +89,9 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData)
     /// <returns>
     /// Валидируемый результат:<br>
     /// - Если валидный, то свойство Value хранит TOutputData.<br>
-    /// - Если невалидный, то в свойстве Error хранится TError.
+    /// - Если невалидный, то в свойстве Error.Value хранится TError, а в Error.Type тип невалидного результата, представленный InvalidAsyncChainResultType.
     /// </returns>
-    public async Task<Result<TOutputData, TError>> ExecuteAsync()
+    public async Task<Result<TOutputData, InvalidAsyncChainResult<TError>>> ExecuteAsync()
     {
         ThrowIfInvalidList();
 
@@ -72,15 +99,18 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData)
 
         foreach (IAsyncInvokable<TError> asyncOperation in asyncOperations)
         {
-            var result = await asyncOperation.InvokeAsync(data);
+            if (cancellationToken is not null && cancellationToken.Value.IsCancellationRequested)
+                return Result<TOutputData, InvalidAsyncChainResult<TError>>.CreateFailure(new InvalidAsyncChainResult<TError>(InvalidAsyncChainResultType.CancellationTokenRequested));
+
+            var result = await asyncOperation.InvokeAsync(data, cancellationToken);
 
             if (!result.IsValid)
-                return Result<TOutputData, TError>.CreateFailure(result.Error);
+                return Result<TOutputData, InvalidAsyncChainResult<TError>>.CreateFailure(new InvalidAsyncChainResult<TError>(InvalidAsyncChainResultType.NotValidMethodResult, result.Error));
 
             data = result.Value;
         }
 
-        return Result<TOutputData, TError>.CreateSuccess((TOutputData)data);
+        return Result<TOutputData, InvalidAsyncChainResult<TError>>.CreateSuccess((TOutputData)data);
     }
 
     // Проверка списка операций на валидность
@@ -91,5 +121,8 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData)
 
         if (asyncOperations.Last!.Value.OutputType != typeof(TOutputData))
             throw new FormatException($"От последнего типа ожидается \"{typeof(TOutputData).Name}\"!");
+
+        if (asyncOperations.Any(p => p.IsContainsCancellationTokenParameter) && cancellationToken is null)
+            throw new FormatException("При использовании методов с токеном завершения, требуется указать токен в конструкторе цепочки!");
     }
 }

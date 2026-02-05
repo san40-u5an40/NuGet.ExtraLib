@@ -14,7 +14,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>3.0.0</Version>
+    <Version>4.0.0</Version>
     <Description>Extra Libraries for development on .NET</Description>
   </PropertyGroup>
 

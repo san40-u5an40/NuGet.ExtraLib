@@ -96,6 +96,13 @@ Array.Sort(array, Comparator.GetComparator<User, string>(p => p.Name));
 **Instance-методы:**
 - `Increment` — Инкрементирование счётчика со стандартным или указанным шагом.
 - `Decrement` — Декрементирование счётчика со стандартным или указанным шагом.
+- `SetValidator` — Установка валидатора допустимых значений (можно лямбдой). При невалидном результате (в том числе при установке валидатора) возникнет исключение `CounterNotValidValueException`, которое имеет следующие свойства:
+    - `Counter` — Счётчик, с которым связано исключение.
+    - `OperationType` — Перечисление, хранящее операцию, которая осуществлялась со счётчиком:
+        - `SetValidator` — Устанавливался валидатор.
+        - `Increment` — Значение счётчика увеличивалось.
+        - `Decrement` — Значение счётчика уменьшалось.
+    - `Step` — Шаг, на который изменялось значение счётчика.
 - `Clone` — Клонирование счётчика.
 - `CompareTo` — Сравнение счётчиков.
 - `Equals` — Проверка счётчика на равенство (по значениям `Name` и `Value`).
@@ -121,7 +128,14 @@ Array.Sort(array, Comparator.GetComparator<User, string>(p => p.Name));
 - `<=` — Сравнение двух счётчиков с помощью `CompareTo`.
 
 **Подписка на события:**
-
+- `Handler` — Событие, принимающее делегат, который будет вызываться при операциях, изменяющих значение счётчика.
+- `CounterEventHandler` — Делегат `Action<CounterOperationType, long, Counter>`, принимаемый событием `Handler`:
+    - `CounterOperationType` — Тип операции, производимый над счётчиком, всё те же:
+        - `SetValidator` — Установка валидатора (но при установке валидатора событие не вызывается).
+        - `Increment` — Увеличение значения счётчика.
+        - `Decrement` — Уменьшение значения счётчика.
+    - `long` — Шаг, на который изменялся счётчик.
+    - `Counter` — Сам счётчик, связанный с событием.
 
 ### Примеры кода
 Со счётчиком на основе замыкания:
@@ -141,6 +155,29 @@ counter++;
 Console.WriteLine(counter); // "Подпесчеки: 11"
 ```
 
+С подпиской на событие:
+```C#
+// Main:
+Counter counter = new(0, "Подпесчеки");
+counter.Handler += CounterEventHandler;
+
+counter
+    .Increment()
+    .Increment(100)
+    .Decrement()
+    .Decrement(12);
+
+// Метод-обработчик (название можно и другое):
+static void CounterEventHandler(CounterOperationType type, long step, Counter counter) =>
+    Console.WriteLine($"Операция: {type, -10} | Шаг: {step, - 10} | Имя счётчика: {counter.Name}");
+
+// Вывод в консоль:
+Операция: Increment  | Шаг: 1          | Имя счётчика: Подпесчеки
+Операция: Increment  | Шаг: 100        | Имя счётчика: Подпесчеки
+Операция: Decrement  | Шаг: 1          | Имя счётчика: Подпесчеки
+Операция: Decrement  | Шаг: 12         | Имя счётчика: Подпесчеки
+```
+
 ## DefaultConstants
 ### Назначение
 Дополнительные константы для примитивов.
@@ -150,10 +187,13 @@ Console.WriteLine(counter); // "Подпесчеки: 11"
 - `int.PositiveNumber` — Положительное число `1`.
 - `int.Zero` — Содержит ноль (более явная форма `default`).
 - `int.NegativeNumber` — Отрицательное число `-1`.
+- `int.RandomValue` — Случайное число.
+- `int.RandomPositiveValue` — Случайное положительное число.
+- `int.RandomNegativeValue` — Случайное отрицательное число.
 
 ### Примеры кода
 ```C#
-Counter counter = new(value: int.Zero, name: string.NotEmpty);
+Counter counter = new(value: int.RandomPositiveValue, name: string.NotEmpty);
 ```
 
 ## EmailsParser
@@ -479,7 +519,13 @@ var asyncChainResult = await new AsyncChain<string, int, string>(DOCUMENT_PATH)
 - `AddMethod` — Добавляет указанные делегат в цепочку (есть поддержка `Readyable` out-параметра).
     1. `TInput` — Тип получаемых методом данных.
     2. `TOutput` — Тип возвращаемых методом данных в виде `Result<this, Chain.TError>` или `Task<Result<this, Chain.TError>>` при асинхронных методах.
-- `Execute/ExecuteAsync` — Выполняет цепочку и возвращает `Result<Chain.TOutputData, Chain.TError>`.
+- `Execute/ExecuteAsync` — Выполняет цепочку и возвращает `Result<Chain.TOutputData, Chain.TError>` для обычной цепочки и `Result<Chain.TOutputData, InvalidAsyncChainResult<Chain.TError>>`.
+
+**Подробнее про InvalidAsyncChainResult, хранимый в Result.Error у асинхронной цепочки:**
+- `Value?` — Информация о хранимой ошибке, представлена типом `Chain.TError`.
+- `Type` — Тип невалидного результата, представленный перечислением `InvalidAsyncChainResultType`, имеющим следующие значения:
+    - `CancellationTokenRequested` — Был вызван токен завершения, и его обработала цепочка (если он обрабатывается внутри метода, то тип ошибки будет другой).
+    - `NotValidMethodResult` — Один из методов вернул невалидный результат.
 
 **Соглашения об использовании:**
 - Тип входных данных первого метода цепочки и тип выходных данных последнего метода цепочки должны совпадать с типами начальных и выходных данных самой цепочки (иначе возникнет исключение).
@@ -788,6 +834,13 @@ Reflection.Print(pathAssembly, "Std.Comparator");
 ```
 
 ## История последних изменений
+### v4.0.0
+- Добавлена поддержка токена завершения асинхронной цепочкой. Добавляемые методы могут принимать его вторым параметром, в саму же цепочку он передаётся при помощи конструктора.
+- Изменён тип возвращаемого результата асинхронной цепочкой на `Broad.Patterns.Result<TOutputData, InvalidAsyncChainResult<TError>>`.
+- Собственно добавился сам `Broad.Patterns.InvalidAsyncChainResult` и хранимое в нём перечисление `Broad.Patterns.InvalidAsyncChainResultType`. Они позволяют установить причину невалидного завершения асинхронной цепочки: цепочка выявила сигнализирующий токен завершения, или же метод цепочки вернул невалидный результат (мог также по причине токена, но это всё равно другой вид невалидного результата).
+- В `Broad.Counter` добавилась возможность устанавливать валидатор с помощью метода `SetValidator` и появилось ассоциируемое с этим исключение `CounterNotValidValueException`. Также добавилась возможность подписаться на события счётчика (паттерн `Observer`) с помощью события `Handler`, управляющего коллекцией делегатов `CounterEventHandler`. Для информирования исключения и событий об операциях, производимых со счётчиком, добавилось перечисление `CounterOperationType`.
+- Добавлены базовые константы для `int`, возвращающие случайное числовое значение.
+
 ### v3.0.0
 - Добавлены тесты для ключевых классов библиотеки!
 - Добавлена история последних изменений!
@@ -819,7 +872,3 @@ Reflection.Print(pathAssembly, "Std.Comparator");
 
 ### v1.2.0
 - Добавлен `Broad.MessageBox` — Класс для создания текстовых окон Windows.
-
-### v1.1.0
-- Изменена версия .NET на 10
-- Добавлена поддержка блоков расширения для статических методов `Console`.

@@ -29,5 +29,20 @@ public static class DefaultConstants
         /// Отрицательное число
         /// </summary>
         public static int NegativeNumber => -1;
+
+        /// <summary>
+        /// Случайное число
+        /// </summary>
+        public static int RandomValue => new Random().Next(int.MinValue, int.MaxValue);
+
+        /// <summary>
+        /// Случайное положительное число
+        /// </summary>
+        public static int RandomPositiveValue => new Random().Next(int.Zero, int.MaxValue);
+
+        /// <summary>
+        /// Случайное отрицательное число
+        /// </summary>
+        public static int RandomNegativeValue => new Random().Next(int.MinValue, int.Zero);
     }
 }
