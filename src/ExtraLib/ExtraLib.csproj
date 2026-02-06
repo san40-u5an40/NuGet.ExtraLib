@@ -16,12 +16,13 @@
     <RepositoryUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</RepositoryUrl>
     <PackageProjectUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>4.0.1</Version>
+    <Version>4.1.0</Version>
     <Description>Extra Libraries for development on .NET</Description>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSource>true</IncludeSource>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Deterministic>true</Deterministic>
   </PropertyGroup>

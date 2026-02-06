@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace ExtraLib.Tests.Broad.Patterns;
+﻿namespace ExtraLib.Tests.Broad.Patterns;
 
 public static class AsyncChainTests
 {
