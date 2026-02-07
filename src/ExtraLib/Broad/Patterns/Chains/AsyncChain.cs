@@ -9,6 +9,7 @@
 /// <typeparam name="TOutputData">Данные, которые цепочка возвращает в самом конце</typeparam>
 /// <typeparam name="TError">Тип ошибки, которую возвращает цепочка при невалидном результате</typeparam>
 /// <param name="startData">Начальные данные цепочки</param>
+/// <param name="cancellationToken">Токен завершения</param>
 public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, CancellationToken? cancellationToken = null)
     where TInputData : notnull
     where TOutputData : notnull
@@ -87,8 +88,8 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     /// Асинхронное выполнение цепочки операций
     /// </summary>
     /// <returns>
-    /// Валидируемый результат:<br>
-    /// - Если валидный, то свойство Value хранит TOutputData.<br>
+    /// Валидируемый результат:\
+    /// - Если валидный, то свойство Value хранит TOutputData.\
     /// - Если невалидный, то в свойстве Error.Value хранится TError, а в Error.Type тип невалидного результата, представленный InvalidAsyncChainResultType.
     /// </returns>
     public async Task<Result<TOutputData, InvalidAsyncChainResult<TError>>> ExecuteAsync()

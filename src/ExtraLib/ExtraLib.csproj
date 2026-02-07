@@ -7,13 +7,11 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 
-		<AssemblyVersion>4.2.0.0</AssemblyVersion>
-		<FileVersion>4.2.0.0</FileVersion>
-		<Version>4.2.0</Version>
+		<AssemblyVersion>4.3.0.0</AssemblyVersion>
+		<FileVersion>4.3.0.0</FileVersion>
+		<Version>4.3.0</Version>
 		<PackageReleaseNotes>
-			- Оптимизирован Nuget Health
-			- Добавлена поддержка подсказок с помощью IntelliSense
-			- Добавлены PackageReleaseNotes
+			Исправлены xml-подсказки и добавлен `Verifier` для проверки валидности классов, имеющих атрибуты валидации.
 		</PackageReleaseNotes>
 
 		<Title>Extra Libraries</Title>

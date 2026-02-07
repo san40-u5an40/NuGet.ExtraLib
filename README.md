@@ -19,6 +19,7 @@
 - [Readyable](#readyable)
 - [Result](#result)
 - [Chain and AsyncChain](#chain-and-asyncchain)
+- [Verifier](#verifier)
 
 Полезны при консольной разработке (namespace san40_u5an40.ExtraLib.ConsoleApp):
 - [ConsoleExtension](#consoleextension)
@@ -543,6 +544,47 @@ var incrementResult = new Chain<string, string, string>(START_VALUE)
     .Execute();
 ```
 
+## Verifier
+### Назначение
+Статический класс для проверки объектов, имеющих атрибуты валидации.
+
+### Структура
+**Статические методы:**
+ - `Check` — Проверяет валидируемый объект и возвращает `Result<T, IReadOnlyList<ValidationResult>>`, где `T` — тип валидируемого объекта.
+
+### Примеры кода
+Класс с атрибутами валидации:
+```C#
+public class User
+{
+    public User(string name, int age) => (Name, Age) = (name, age);
+
+    [Required]
+    [StringLength(20, MinimumLength = 3)]
+    public string Name { get; private init; }
+
+    [Required]
+    [Range(18, 45)]
+    public int Age { get; private init; }
+}
+```
+
+Проверка на валидность:
+```C#
+//   Валидное имя - ↓     ↓ - Невалидный возраст
+User user = new("Васили", 17);
+var verifyResult = Verifier.Check(user);
+
+if (!verifyResult.IsValid)
+{
+    foreach (var error in verifyResult.Error)
+        Console.WriteLine(error.ErrorMessage); // The field Age must be between 18 and 45.
+    return;
+}
+else
+    DoSomething(user);
+```
+
 ## ConsoleExtension
 ### Назначение
 Статический класс с блоками расширения для консоли.
@@ -836,6 +878,10 @@ Reflection.Print(pathAssembly, "Std.Comparator");
 ```
 
 ## История последних изменений
+### v4.3.0
+- Исправлены xml-подсказки.
+- Добавлен `Verifier` для проверки валидности классов, имеющих атрибуты валидации.
+
 ### v4.2.0
 - Оптимизирован Nuget Health.
 - Добавлена поддержка подсказок с помощью IntelliSense.
@@ -874,6 +920,3 @@ Reflection.Print(pathAssembly, "Std.Comparator");
 - Добавлен ковариативный интерфейс `Broad.Patterns.IValidable` для валидируемых объектов.
 - Добавлена поддержка классом `Result` интерфейса `IValidable`.
 - Добавлена функциональная цепочка `Broad.Patterns.Chain`.
-
-### v1.3.0 - v1.3.1
-- Добавлен и исправлен `Broad.Result` — Класс для хранения информации о результате выполнения метода.

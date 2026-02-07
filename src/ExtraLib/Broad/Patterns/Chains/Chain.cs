@@ -60,8 +60,8 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     /// Выполнение цепочки операций
     /// </summary>
     /// <returns>
-    /// Валидируемый результат:<br>
-    /// - Если валидный, то свойство Value хранит TOutputData.<br>
+    /// Валидируемый результат:\
+    /// - Если валидный, то свойство Value хранит TOutputData.\
     /// - Если невалидный, то в свойстве Error хранится TError.
     /// </returns>
     public Result<TOutputData, TError> Execute()

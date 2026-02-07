@@ -23,6 +23,7 @@ public static class StringCrypter
     /// <summary>
     /// Метод для кодирования строк
     /// </summary>
+    /// <param name="input">Строка для шифрования</param>
     /// <param name="key">Ключ для смещения шифровки</param>
     /// <param name="cryptType">Тип кодирования: указывается перечислением StringCrypter.Type</param>
     /// <returns>Закодированная строка</returns>
@@ -45,6 +46,7 @@ public static class StringCrypter
     /// <summary>
     /// Метод для декодирования строк
     /// </summary>
+    /// <param name="input">Строка для шифрования</param>
     /// <param name="key">Ключ для смещения шифровки: необходимо указать противоположное значение от кодирующего</param>
     /// <param name="cryptType">Тип кодирования: указывается перечислением StringCrypter.Type</param>
     /// <returns>Декодированная строка</returns>
