@@ -1,45 +1,64 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	  
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>san40_u5an40.$(AssemblyName)</PackageId>
-    <Title>Extra Libraries</Title>
-    <Authors>san40_u5an40</Authors>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageOutputPath>..\..\..\_Releases</PackageOutputPath>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</PackageProjectUrl>
-    <RepositoryType>git</RepositoryType>
-    <Version>4.1.0</Version>
-    <Description>Extra Libraries for development on .NET</Description>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
 
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <IncludeSource>true</IncludeSource>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
+		<AssemblyVersion>4.2.0.0</AssemblyVersion>
+		<FileVersion>4.2.0.0</FileVersion>
+		<Version>4.2.0</Version>
+		<PackageReleaseNotes>
+			- Оптимизирован Nuget Health
+			- Добавлена поддержка подсказок с помощью IntelliSense
+			- Добавлены PackageReleaseNotes
+		</PackageReleaseNotes>
 
-  <ItemGroup>
-    <None Include="..\..\icons\icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+		<Title>Extra Libraries</Title>
+		<Description>Extra Libraries for development on .NET</Description>
+		<Authors>san40_u5an40</Authors>
+
+		<IsPackable>true</IsPackable>
+		<PackageId>san40_u5an40.$(AssemblyName)</PackageId>
+		<PackageTags>lib;library;classes;библиотека;класы</PackageTags>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageOutputPath>..\..\..\_Releases</PackageOutputPath>
+		<PackageProjectUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/san40-u5an40/NuGet.ExtraLib</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedAllSources>true</EmbedAllSources>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+		<Deterministic>true</Deterministic>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<DeterministicSourcePaths>true</DeterministicSourcePaths>
+		<UseHostCompilerIfAvailable>false</UseHostCompilerIfAvailable>
+
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>portable</DebugType>
+		<PublishWindowsPdb>false</PublishWindowsPdb>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\icons\icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+	</ItemGroup>
 
 </Project>
