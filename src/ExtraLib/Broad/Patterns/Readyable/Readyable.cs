@@ -70,7 +70,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
     /// </summary>
     /// <param name="message">Сообщение об ошибке</param>
     /// <exception cref="ReadyableException">Исключение, ассоциированное с объектом, проверяемым на готовность</exception>
-    public void ThrowIfNotWaiting(string message = "Данный объект уже не находится в режиме ожидания!")
+    public void ThrowIfNotWaiting(string message = "This facility is no longer in standby mode")
     {
         if (!IsWaiting)
             throw new ReadyableException(message, State, name);
@@ -82,7 +82,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
     /// </summary>
     /// <param name="message">Сообщение об ошибке</param>
     /// <exception cref="ReadyableException">Исключение, ассоциированное с объектом, проверяемым на готовность</exception>
-    public void ThrowIfNotReady(string message = "Объект не готов к использованию!")
+    public void ThrowIfNotReady(string message = "The object is not ready for use")
     {
         if (!IsReady)
             throw new ReadyableException(message, State, name);
@@ -94,7 +94,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
     /// </summary>
     /// <param name="message">Сообщение об ошибке</param>
     /// <exception cref="ReadyableException">Исключение, ассоциированное с объектом, проверяемым на готовность</exception>
-    public void ThrowIfNotInitialized(string message = "Объект не инициализирован!")
+    public void ThrowIfNotInitialized(string message = "The object has not been initialized")
     {
         if (!IsInitialized)
             throw new ReadyableException(message, State, name);

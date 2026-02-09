@@ -1,6 +1,6 @@
 ﻿namespace ExtraLib.Tests.Broad;
 
-public static class StringExtensionTests
+public static class StringExtensionsTests
 {
     [TestCase("Очень длинная строка, где многа букав, всё сложно крч!")]
     [TestCase("Ещё одна очень длинная строка. Какая же она неприятная по длине!")]
@@ -26,5 +26,30 @@ public static class StringExtensionTests
         string actual = text.ReplaceWhileContain("  ", " ");
 
         Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [TestCase("{0} }")]
+    [TestCase("{1}")]
+    [TestCase("{0} {1}")]
+    [TestCase("{")]
+    [TestCase("")]
+    public static void IsValidForInternalization_OfNotValidMask_ReturnedNotValid(string notValidMask)
+    {
+        var validationResult = notValidMask.IsValidForInternalization(1);
+
+        Assert.That(validationResult.IsValid, Is.False);
+    }
+
+    [TestCase("{0} value", 1)]
+    [TestCase("{0}_{1}_{2}", 3)]
+    [TestCase("value {0}", 1)]
+    [TestCase("{0}", 1)]
+    [TestCase("{0, -20}", 1)]
+    [TestCase("{0, 20}", 1)]
+    public static void IsValidForInternalization_OfValidMask_ReturnedValid(string validMask, int internedValueCount)
+    {
+        var validationResult = validMask.IsValidForInternalization(internedValueCount);
+
+        Assert.That(validationResult.IsValid, Is.True);
     }
 }

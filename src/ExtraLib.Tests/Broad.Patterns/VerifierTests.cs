@@ -36,6 +36,22 @@ public static class VerifierTests
 
         Assert.That(result.IsValid, Is.False);
     }
+
+    [Test]
+    public static void ThrowIfNotValid_NotValidName_ThrowsVerifierException()
+    {
+        User user = new(NOT_VALID_NAME, VALID_AGE);
+
+        Assert.Throws<VerifierException<User>>(() => Verifier.ThrowIfNotValid(user));
+    }
+
+    [Test]
+    public static void ThrowIfNotValid_ValidObject_DoesNotThrow()
+    {
+        User user = new(VALID_NAME, VALID_AGE);
+
+        Assert.DoesNotThrow(() => Verifier.ThrowIfNotValid(user));
+    }
 }
 
 public class User

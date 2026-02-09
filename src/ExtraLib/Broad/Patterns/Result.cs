@@ -25,12 +25,12 @@ public class Result<TSuccess, TFailure>
     /// <summary>
     /// Свойство, хранящее данные при валидном результате
     /// </summary>
-    public TSuccess Value => isValid ? success! : throw new InvalidOperationException("При невалидном результате обращение к значению результата не допустимо");
+    public TSuccess Value => isValid ? success! : throw new InvalidOperationException("If the result is invalid, accessing the result value is not allowed");
 
     /// <summary>
     /// Свойство, хранящее данные при невалидном результате
     /// </summary>
-    public TFailure Error => !isValid ? failure! : throw new InvalidOperationException("При валидном результате обращение к сведеньям об ошибке не допустимо");
+    public TFailure Error => !isValid ? failure! : throw new InvalidOperationException("If the result is valid, you cannot access the error information");
 
     /// <summary>
     /// Статический метод создания валидного результата

@@ -1,7 +1,5 @@
 ﻿namespace san40_u5an40.ExtraLib.Broad.Patterns;
 
-// А если вместе с такими функциями содержится и сам токен, то он будет передан в InvokeAsync
-
 /// <summary>
 /// Цепочка вызова асинхронных операций, передающая указанные данные
 /// </summary>
@@ -78,7 +76,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
         Type operationInputType = asyncOperation.InputType;
 
         if (lastOutputType != operationInputType)
-            throw new FormatException($"Входные параметры для операции \"{asyncOperation.Name}\" не соответствуют требованиям!");
+            throw new FormatException($"The input parameters for the operation \"{asyncOperation.Name}\" do not meet the requirements");
 
         asyncOperations.AddLast(asyncOperation);
         return this;
@@ -118,12 +116,12 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     private void ThrowIfInvalidList()
     {
         if (asyncOperations.Count == 0)
-            throw new InvalidOperationException("Для исполнения цепочки операций необходимо сначала добавить операции!");
+            throw new InvalidOperationException("To perform a chain of operations, you must first add operations");
 
         if (asyncOperations.Last!.Value.OutputType != typeof(TOutputData))
-            throw new FormatException($"От последнего типа ожидается \"{typeof(TOutputData).Name}\"!");
+            throw new FormatException($"The last type is expected to have a \"{typeof(TOutputData).Name}\"");
 
         if (asyncOperations.Any(p => p.IsContainsCancellationTokenParameter) && cancellationToken is null)
-            throw new FormatException("При использовании методов с токеном завершения, требуется указать токен в конструкторе цепочки!");
+            throw new FormatException("When using methods with a completion token, you need to specify the token in the chain constructor");
     }
 }

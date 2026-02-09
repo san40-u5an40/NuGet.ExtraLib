@@ -45,4 +45,67 @@ public static class StringExtensions
 
         return text;
     }
+
+    /// <summary>
+    /// Попытка форматирования строки
+    /// </summary>
+    /// <param name="text">Строка для форматирования</param>
+    /// <param name="formatted">Отформатированная строка в случае успеха, или пустая строка в случае неуспеха</param>
+    /// <param name="valuesToInternalization">Переменные для интернирования</param>
+    /// <returns>Логическое значение, отражающее получилось ли форматировать указанную строку</returns>
+    public static bool TryFormat(this string text, out string formatted, params object[] valuesToInternalization)
+    {
+        try
+        {
+            formatted = string.Format(text, valuesToInternalization);
+
+            if (IsContainsAllInternedValue(formatted, valuesToInternalization))
+                return true;
+            else
+                return ClearOutStringAndReturnFalse(out formatted);
+        }
+        catch
+        {
+            return ClearOutStringAndReturnFalse(out formatted);
+        }
+
+        static bool IsContainsAllInternedValue(string formattedString, object[] valuesToInternalization)
+        {
+            foreach (var value in valuesToInternalization)
+                if (!formattedString.Contains(value.ToString()!))
+                    return false;
+
+            return true;
+        }
+
+        static bool ClearOutStringAndReturnFalse(out string formatted)
+        {
+            formatted = string.Empty;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Проверка валидности строки на предмет интернирования
+    /// </summary>
+    /// <param name="text">Строка для проверки</param>
+    /// <param name="internedCount">Количество переменных для интернирования</param>
+    /// <returns>Результат, отражающий поддерживает ли строка интернирование, указанного количества переменных</returns>
+    public static (bool IsValid, string? Error) IsValidForInternalization(this string text, int internedCount)
+    {
+        if (!string.IsNullOrEmpty(text) && text.TryFormat(out _, CreateRandomValues(internedCount)))
+            return (true, null);
+        else
+            return (false, $"The specified string does not support internalization ({internedCount})");
+
+        static object[] CreateRandomValues(int cnt)
+        {
+            var values = new object[cnt];
+
+            for (int i = 0; i < cnt; i++)
+                values[i] = int.RandomValue;
+
+            return values;
+        }
+    }
 }

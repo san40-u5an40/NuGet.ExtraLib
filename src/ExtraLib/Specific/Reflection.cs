@@ -48,14 +48,14 @@ public static class Reflection
                 continue;
 
             // Если такие пользовательские типы есть, то вывод информации о них и о сборке, которая их содержит
-            Console.WriteLine("\nСостав сборки \"" + assembly.GetName().Name + ".dll\":");
+            Console.WriteLine("\nThe composition of the assembly \"" + assembly.GetName().Name + ".dll\":");
             Console.WriteLine(ZERO_LEVEL);
 
             // Локальная функция, выводящая информацию о типах, содержащих атрибут
             PrintTypesInfo(types);
 
             // Завершение блока информации о сборке
-            Console.WriteLine("Конец сборки");
+            Console.WriteLine("End of assembly");
         }
 
         // Сброс цвета
@@ -102,7 +102,7 @@ public static class Reflection
         int cntConstructors = constructors.Length;
 
         // Вывод заголовка пользовательского типа
-        Console.WriteLine(ZERO_LEVEL + "Тип: \"" + type.Name + "\":");
+        Console.WriteLine(ZERO_LEVEL + "Type: \"" + type.Name + "\":");
         Console.WriteLine(FIRST_LEVEL);
 
         // Если в пользовательском типе есть поля, вывод информации о них
@@ -118,47 +118,47 @@ public static class Reflection
             PrintConstructorsInfo(constructors, cntConstructors);
 
         // Завершение блока информации о пользовательском типе
-        Console.WriteLine(ZERO_LEVEL + "Конец типа");
+        Console.WriteLine(ZERO_LEVEL + "End of type");
         Console.WriteLine(ZERO_LEVEL);
     }
 
     // Вывод информации о полях пользовательского типа
     private static void PrintFieldsInfo(FieldInfo[] fields, int cntFields)
     {
-        Console.WriteLine(FIRST_LEVEL + "Поля:");
+        Console.WriteLine(FIRST_LEVEL + "Fields:");
         Console.WriteLine(SECOND_LEVEL);
 
         foreach (var field in fields)
         {
             var fieldInfo = new StringBuilder()
                 .Append(SECOND_LEVEL)
-                .Append("Имя: ")
+                .Append("Name: ")
                 .Append(field.Name.PadRight(20))
                 .Append(SEPARATOR)
-                .Append("Тип: ")
+                .Append("Type: ")
                 .Append(field.FieldType.ToString().PadRight(40))
                 .Append(SEPARATOR)
-                .Append("Атрибуты: ")
+                .Append("Attributes: ")
                 .Append(field.Attributes);
             Console.WriteLine(fieldInfo);
         }
 
         Console.WriteLine(SECOND_LEVEL);
-        Console.WriteLine(FIRST_LEVEL + "Общее количество: " + cntFields);
+        Console.WriteLine(FIRST_LEVEL + "Total number: " + cntFields);
         Console.WriteLine(FIRST_LEVEL);
     }
 
     // Вывод информации о методах пользовательского типа
     private static void PrintMethodsInfo(MethodInfo[] methods, int cntMethods)
     {
-        Console.WriteLine(FIRST_LEVEL + "Методы:");
+        Console.WriteLine(FIRST_LEVEL + "Methods:");
         Console.WriteLine(SECOND_LEVEL);
 
         foreach (var method in methods)
         {
-            Console.WriteLine(SECOND_LEVEL + "Имя: " + method.Name);
-            Console.WriteLine(THIRD_LEVEL + "Атрибуты: " + method.Attributes);
-            Console.WriteLine(THIRD_LEVEL + "Возвращаемый тип: " + method.ReturnParameter);
+            Console.WriteLine(SECOND_LEVEL + "Name: " + method.Name);
+            Console.WriteLine(THIRD_LEVEL + "Attributes: " + method.Attributes);
+            Console.WriteLine(THIRD_LEVEL + "Return type: " + method.ReturnParameter);
 
             if (method.GetParameters().Length > 0)
             {
@@ -167,26 +167,26 @@ public static class Reflection
                     .Select(p => "(" + p.ParameterType + ") " + p.Name)
                     .ToArray<string>();
 
-                Console.WriteLine(THIRD_LEVEL + "Параметры: " + string.Join(", ", paramsInfo));
+                Console.WriteLine(THIRD_LEVEL + "Parameters: " + string.Join(", ", paramsInfo));
             }
 
             Console.WriteLine(SECOND_LEVEL);
         }
 
-        Console.WriteLine(FIRST_LEVEL + "Общее количество: " + cntMethods);
+        Console.WriteLine(FIRST_LEVEL + "Total number: " + cntMethods);
         Console.WriteLine(FIRST_LEVEL);
     }
 
     // Вывод информации о конструкторах пользовательского типа
     private static void PrintConstructorsInfo(ConstructorInfo[] constructors, int cntConstructors)
     {
-        Console.WriteLine(FIRST_LEVEL + "Конструкторы:");
+        Console.WriteLine(FIRST_LEVEL + "Constructors:");
         Console.WriteLine(SECOND_LEVEL);
 
         foreach (var constructor in constructors)
         {
-            Console.WriteLine(SECOND_LEVEL + "Имя: " + constructor.Name);
-            Console.WriteLine(THIRD_LEVEL + "Атрибуты: " + constructor.Attributes);
+            Console.WriteLine(SECOND_LEVEL + "Name: " + constructor.Name);
+            Console.WriteLine(THIRD_LEVEL + "Attributes: " + constructor.Attributes);
 
             if (constructor.GetParameters().Length > 0)
             {
@@ -195,13 +195,13 @@ public static class Reflection
                     .Select(p => "(" + p.ParameterType + ") " + p.Name)
                     .ToArray<string>();
 
-                Console.WriteLine(THIRD_LEVEL + "Параметры: " + string.Join(", ", paramsInfo));
+                Console.WriteLine(THIRD_LEVEL + "Parameters: " + string.Join(", ", paramsInfo));
             }
 
             Console.WriteLine(SECOND_LEVEL);
         }
 
-        Console.WriteLine(FIRST_LEVEL + "Общее количество: " + cntConstructors);
+        Console.WriteLine(FIRST_LEVEL + "Total number: " + cntConstructors);
         Console.WriteLine(FIRST_LEVEL);
     }
     
@@ -232,7 +232,7 @@ public static class Reflection
         Console.ForegroundColor = ConsoleColor.DarkGreen;
 
         // Вывод заголовка сборки
-        Console.WriteLine("\nСостав сборки \"" + assemblyName + ".dll\":");
+        Console.WriteLine("\nThe composition of the assembly \"" + assemblyName + ".dll\":");
         Console.WriteLine(ZERO_LEVEL);
 
         // Вывод информации об одном типе (либо если он указан вместе со сборкой, либо если он указан один)
@@ -246,7 +246,7 @@ public static class Reflection
         }
 
         // Завершение блока информации о сборке и её тип(е/ах)
-        Console.WriteLine("Конец сборки");
+        Console.WriteLine("End of assembly");
 
         // Сброс цвета
         Console.ResetColor();
@@ -321,35 +321,11 @@ public static class Reflection
             errorInfo = null;
             return true;
         }
-        catch (BadImageFormatException ex)
-        {
-            (assembly, errorInfo) = (null, ex.Message);
-        }
-        catch (System.IO.FileNotFoundException ex)
-        {
-            (assembly, errorInfo) = (null, ex.Message);
-        }
-        catch (System.IO.PathTooLongException ex)
-        {
-            (assembly, errorInfo) = (null, ex.Message);
-        }
-        catch (System.Security.SecurityException ex)
-        {
-            (assembly, errorInfo) = (null, ex.Message);
-        }
-        // Неизвестная ошибка
         catch (Exception ex)
         {
-            var report = new StringBuilder()
-                .AppendLine(ex.Message)
-                .AppendLine("Источник: " + ex.Source)
-                .AppendLine(ex.StackTrace);
-
-            (assembly, errorInfo) = (null, report.ToString());
+            (assembly, errorInfo) = (null, ex.Message);
+            return false;
         }
-
-        // Если не удалось открыть сборку
-        return false;
     }
 
     /// <summary>

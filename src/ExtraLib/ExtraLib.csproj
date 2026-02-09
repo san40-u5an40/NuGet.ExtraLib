@@ -7,11 +7,18 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 
-		<AssemblyVersion>4.3.0.0</AssemblyVersion>
-		<FileVersion>4.3.0.0</FileVersion>
-		<Version>4.3.0</Version>
+		<AssemblyVersion>4.4.0.0</AssemblyVersion>
+		<FileVersion>4.4.0.0</FileVersion>
+		<Version>4.4.0</Version>
 		<PackageReleaseNotes>
-			Исправлены xml-подсказки и добавлен `Verifier` для проверки валидности классов, имеющих атрибуты валидации.
+			Изменения:
+			- Все сообщения для исключений переведены на английский язык, как и рефлексивная информация из класса `Specific.Reflection`.
+
+			Добавлены:
+			- Атрибуты для валидации моделей: `ContainsAttribute` и `InternalizationSupportedAttribute`.
+			- Метод `Broad.Patterns.Verifier.ThrowIfNotValid` и связанное с этим исключение `VerifierException`.
+			- Методы расширения для типа `Object`: `Broad.ObjectExtensions`.
+			- Методы `Broad.StringExtensions.TryFormat` и `Broad.StringExtensions.IsValidForInternalization`.
 		</PackageReleaseNotes>
 
 		<Title>Extra Libraries</Title>

@@ -56,7 +56,7 @@ public static class DefaultConstants
         public static int Random(int max)
         {
             if (max < int.Zero)
-                throw new FormatException("Не допустимо указывать отрицательное значение!");
+                throw new FormatException("It is not acceptable to specify a negative value");
 
             return rand.Next(int.Zero, max);
         }
@@ -70,7 +70,7 @@ public static class DefaultConstants
         public static int Random(int min, int max)
         {
             if (max < min)
-                throw new FormatException("Максимальное число не может быть меньше минимального!");
+                throw new FormatException("The maximum number cannot be less than the minimum");
 
             return rand.Next(min, max);
         }

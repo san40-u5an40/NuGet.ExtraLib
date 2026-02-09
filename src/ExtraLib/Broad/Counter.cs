@@ -85,7 +85,7 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
         remove
         {
             if (!observers.Contains(value))
-                throw new ArgumentException("Данный делегат не содержится в коллекции!");
+                throw new ArgumentException("This delegate is not contained in the collection");
             observers.Remove(value);
         }
     }

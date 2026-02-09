@@ -50,7 +50,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
         Type operationInputType = operation.InputType;
 
         if (lastOutputType != operationInputType)
-            throw new FormatException($"Входные параметры для операции \"{operation.Name}\" не соответствуют требованиям!");
+            throw new FormatException($"The input parameters for the operation \"{operation.Name}\" do not meet the requirements");
 
         operations.AddLast(operation);
         return this;
@@ -87,9 +87,9 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     private void ThrowIfInvalidList()
     {
         if (operations.Count == 0)
-            throw new InvalidOperationException("Для исполнения цепочки операций необходимо сначала добавить операции!");
+            throw new InvalidOperationException("To perform a chain of operations, you must first add operations");
 
         if (operations.Last!.Value.OutputType != typeof(TOutputData))
-            throw new FormatException($"От последнего типа ожидается \"{typeof(TOutputData).Name}\"!");
+            throw new FormatException($"The last type is expected to have a \"{typeof(TOutputData).Name}\"");
     }
 }

@@ -28,7 +28,7 @@ file class KeySelectorComparer<TSource, TKey> : IComparer<TSource>
     public int Compare(TSource? obj1, TSource? obj2)
     {
         if (obj1 == null || obj2 == null)
-            throw new NullReferenceException("Некорректные значения для сравнения");
+            throw new NullReferenceException("Incorrect values for comparison");
 
         return comparer.Compare(keySelector(obj1), keySelector(obj2));
     }
