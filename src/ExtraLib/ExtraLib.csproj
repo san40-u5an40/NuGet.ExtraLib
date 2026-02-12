@@ -7,21 +7,14 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 
-		<AssemblyVersion>5.0.0.0</AssemblyVersion>
-		<FileVersion>5.0.0.0</FileVersion>
-		<Version>5.0.0</Version>
+		<AssemblyVersion>5.0.1.0</AssemblyVersion>
+		<FileVersion>5.0.1.0</FileVersion>
+		<Version>5.0.1</Version>
 		<PackageReleaseNotes>
-			Удалены:
-			- `TimerHelper`.
-			- `StringCrypt`.
-
-			Изменены:
-			- Структура пространства имён.
-			- Шаблон для создания атрибутов валидации: был добавлен абстрактный метод `IsValidAttributeParameters` для проверки корректности параметров самого атрибута. Если он возвращает `false`, при вызове стандартного метода атрибута `IsValid` возникнет исключение `AttributeParametersException`.
-
-			Добавлены:
-			- Само исключение для некорректных параметров атрибута валидации `AttributeParametersException`.
-			- Методы в `Core.ObjectExtensions`: `IsNull` и `IsNotNull`.
+			Незначительные улучшения:
+			- `Counter.cs` разбит на несколько файлов.
+			- Удалена лишняя проверка ожидания `Readyable` при интеграции с `Result`.
+			- В `Readme` обновлено именование `StringExtensions`.
 		</PackageReleaseNotes>
 
 		<Title>Extra Libraries</Title>

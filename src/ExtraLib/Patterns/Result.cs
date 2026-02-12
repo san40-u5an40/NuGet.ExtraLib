@@ -58,7 +58,6 @@ public class Result<TSuccess, TFailure>
     {
         using (new Lock().EnterScope())
         {
-            readyable.ThrowIfNotWaiting();
             readyable.Value = success;
             readyable.ToReady();
         }
@@ -75,10 +74,7 @@ public class Result<TSuccess, TFailure>
     public static Result<TSuccess, TFailure> CreateFailure(TFailure failure, IReadyable<TSuccess> readyable)
     {
         using (new Lock().EnterScope())
-        {
-            readyable.ThrowIfNotWaiting();
             readyable.ToNeverBeReady();
-        }
         
         return new(false, default, failure);
     }

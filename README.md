@@ -9,7 +9,7 @@
 - [Comparator](#comparator)
 - [DefaultConstants](#defaultconstants)
 - [ObjectExtensions](#objectextensions)
-- [StringExtension](#stringextension)
+- [StringExtensions](#stringextensions)
 
 Паттерны (san40_u5an40.ExtraLib.Patterns):
 - [Readyable](#readyable)
@@ -135,7 +135,7 @@ if (parameters.Any(p => p.IsNull()))
     throw new AttributeParametersException(parameters, "Attribute values cannot have null values");
 ```
 
-## StringExtension
+## StringExtensions
 ### Назначение
 Статический класс с методами расширения для строк.
 
@@ -924,7 +924,7 @@ Reflection.Print(pathAssembly, "Std.Comparator");
 ```
 
 ## История последних изменений
-### v5.0.0
+### v5.0.0 - 5.0.1
 Удалены:
 - `TimerHelper`.
 - `StringCrypt`.

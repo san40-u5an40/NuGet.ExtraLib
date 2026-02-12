@@ -1,49 +1,6 @@
 ﻿namespace san40_u5an40.ExtraLib.Patterns;
 
 /// <summary>
-/// Перечисление, отражающее тип операции, производимой над счётчиком
-/// </summary>
-public enum CounterOperationType : ushort
-{
-    SetValidator,
-    Increment,
-    Decrement,
-}
-
-/// <summary>
-/// Исключение о невалидном значении счётчика
-/// </summary>
-public class CounterNotValidValueException : Exception
-{
-    public CounterNotValidValueException(Counter counter, CounterOperationType operationType, long step, string? message = null)
-        : base(message) =>
-        (Counter, OperationType, Step) = (counter, operationType, step);
-
-    /// <summary>
-    /// Счётчик, с которым связано исключение
-    /// </summary>
-    public Counter Counter { get; private init; }
-
-    /// <summary>
-    /// Операция, производимая над счётчиком
-    /// </summary>
-    public CounterOperationType OperationType { get; private init; }
-
-    /// <summary>
-    /// Шаг, на который изменялся счётчик
-    /// </summary>
-    public long Step { get; private init; }
-}
-
-/// <summary>
-/// Делегат для подписки на обновления счётчика
-/// </summary>
-/// <param name="type">Тип операции, производимый над счётчиком</param>
-/// <param name="step">Количество, на которое изменился счётчик</param>
-/// <param name="counter">Источник изменений</param>
-public delegate void CounterEventHandler(CounterOperationType type, long step, Counter counter);
-
-/// <summary>
 /// Счётчик
 /// </summary>
 public class Counter(long value = 0, string? name = null) : ICloneable, IComparable<Counter>
