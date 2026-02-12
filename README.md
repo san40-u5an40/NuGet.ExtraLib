@@ -4,31 +4,33 @@
 Версионные изменения [в конце](#история-последних-изменений) документа.
 
 ## Оглавление:
-Полезны в широком круге задач (namespace san40_u5an40.ExtraLib.Broad):
+Ядро (san40_u5an40.ExtraLib.Core):
 - [Bytes](#bytes)
 - [Comparator](#comparator)
-- [Counter](#counter)
 - [DefaultConstants](#defaultconstants)
-- [EmailsParser](#emailsparser)
-- [HtmlHelper](#htmlhelper)
-- [MessageBox](#messagebox)
 - [ObjectExtensions](#objectextensions)
 - [StringExtension](#stringextension)
-- [TimerHelper](#timerhelper)
 
-Паттерновые классы, также полезные в широком круге задач (namespace san40_u5an40.ExtraLib.Broad.Patterns):
+Паттерны (san40_u5an40.ExtraLib.Patterns):
 - [Readyable](#readyable)
 - [Result](#result)
 - [Chain and AsyncChain](#chain-and-asyncchain)
+- [Counter](#counter)
+
+Валидация (san40_u5an40.ExtraLib.Validation):
 - [Verifier](#verifier)
 - [Custom Attributes](#custom-attributes)
 
-Полезны при консольной разработке (namespace san40_u5an40.ExtraLib.ConsoleApp):
-- [ConsoleExtension](#consoleextension)
+Обработка данных (san40_u5an40.ExtraLib.Data):
+- [EmailsParser](#emailsparser)
+- [HtmlHelper](#htmlhelper)
 
-Для специфичных задач (namespace san40_u5an40.ExtraLib.Specific):
+Ввод-вывод (san40_u5an40.ExtraLib.IO):
+- [ConsoleExtension](#consoleextension)
+- [MessageBox](#messagebox)
+
+Рефлексия (san40_u5an40.ExtraLib.Reflection):
 - [Reflection](#reflection)
-- [StringCrypt](#stringcrypt)
 
 ## Bytes
 ### Назначение
@@ -87,100 +89,6 @@ Array.Sort(array, Comparator.GetComparator<User, string>(p => p.Name));
 // string - т.к. этим типом представлено свойство Name
 ```
 
-## Counter
-### Назначение
-Класс, предназначенный для создания счётчиков.
-
-### Структура
-**Свойства:**
-- `Value` — Значение счётчика.
-- `Name` — Имя счётчика.
-
-**Instance-методы:**
-- `Increment` — Инкрементирование счётчика со стандартным или указанным шагом.
-- `Decrement` — Декрементирование счётчика со стандартным или указанным шагом.
-- `SetValidator` — Установка валидатора допустимых значений (можно лямбдой). При невалидном результате (в том числе при установке валидатора) возникнет исключение `CounterNotValidValueException`, которое имеет следующие свойства:
-    - `Counter` — Счётчик, с которым связано исключение.
-    - `OperationType` — Перечисление, хранящее операцию, которая осуществлялась со счётчиком:
-        - `SetValidator` — Устанавливался валидатор.
-        - `Increment` — Значение счётчика увеличивалось.
-        - `Decrement` — Значение счётчика уменьшалось.
-    - `Step` — Шаг, на который изменялось значение счётчика.
-- `Clone` — Клонирование счётчика.
-- `CompareTo` — Сравнение счётчиков.
-- `Equals` — Проверка счётчика на равенство (по значениям `Name` и `Value`).
-- `GetHashCode` — Переопределён для получения хеш-кода (по значениям `Name` и `Value`).
-- `ToString` —  Преобразование счётчика в строковое значение.
-
-**Статические методы:**
-- `CreateCounter` — Фабрика счётчиков с указанными значениями.
-- `CreateClosuredCounter` — Создание счётчика на основе замыкания.
-
-**Операторы:**
-- `+=` — Увеличивает значение счётчика на указанный шаг.
-- `-=` — Уменьшает значение счётчика на указанный шаг.
-- `++` — Увеличивает значение счётчика на стандартный шаг.
-- `--` — Уменьшает значение счётчика на стандартный шаг.
-- `+ double` — Увеличивает значение счётчика на указанный шаг.
-- `- double` — Уменьшает значение счётчика на указанный шаг.
-- `==` — Проверка счётчика на равенство (по значениям `Name` и `Value`).
-- `!=` — Проверка счётчика на неравенство (по значениям `Name` и `Value`).
-- `>` — Сравнение двух счётчиков с помощью `CompareTo`.
-- `>=` — Сравнение двух счётчиков с помощью `CompareTo`.
-- `<` — Сравнение двух счётчиков с помощью `CompareTo`.
-- `<=` — Сравнение двух счётчиков с помощью `CompareTo`.
-
-**Подписка на события:**
-- `Handler` — Событие, принимающее делегат, который будет вызываться при операциях, изменяющих значение счётчика.
-- `CounterEventHandler` — Делегат `Action<CounterOperationType, long, Counter>`, принимаемый событием `Handler`:
-    - `CounterOperationType` — Тип операции, производимый над счётчиком, всё те же:
-        - `SetValidator` — Установка валидатора (но при установке валидатора событие не вызывается).
-        - `Increment` — Увеличение значения счётчика.
-        - `Decrement` — Уменьшение значения счётчика.
-    - `long` — Шаг, на который изменялся счётчик.
-    - `Counter` — Сам счётчик, связанный с событием.
-
-### Примеры кода
-Со счётчиком на основе замыкания:
-```C#
-var cnt = Counter.CreateClosuredCounter(10);
-for (int i = 0; i < 10; i++)
-    Console.Write(cnt() + " ");
-
-// 10 11 12 13 14 15 16 17 18 19
-```
-
-С обычным счётчиком:
-```C#
-Counter counter = new(value: 0, name: "Подпесчеки");
-counter += 10;
-counter++;
-Console.WriteLine(counter); // "Подпесчеки: 11"
-```
-
-С подпиской на событие:
-```C#
-// Main:
-Counter counter = new(0, "Подпесчеки");
-counter.Handler += CounterEventHandler;
-
-counter
-    .Increment()
-    .Increment(100)
-    .Decrement()
-    .Decrement(12);
-
-// Метод-обработчик (название можно и другое):
-static void CounterEventHandler(CounterOperationType type, long step, Counter counter) =>
-    Console.WriteLine($"Операция: {type, -10} | Шаг: {step, - 10} | Имя счётчика: {counter.Name}");
-
-// Вывод в консоль:
-Операция: Increment  | Шаг: 1          | Имя счётчика: Подпесчеки
-Операция: Increment  | Шаг: 100        | Имя счётчика: Подпесчеки
-Операция: Decrement  | Шаг: 1          | Имя счётчика: Подпесчеки
-Операция: Decrement  | Шаг: 12         | Имя счётчика: Подпесчеки
-```
-
 ## DefaultConstants
 ### Назначение
 Дополнительные константы для примитивов.
@@ -201,106 +109,6 @@ static void CounterEventHandler(CounterOperationType type, long step, Counter co
 Counter counter = new(value: int.RandomPositiveValue, name: string.NotEmpty);
 ```
 
-## EmailsParser
-### Назначение
-Класс для работы с текстом, содержащим email-адреса.
-
-### Структура
-**Константы:**
-- `EmailRegex` — Регулярное выражение, для поиска в тексте email-адресов.
-
-**Методы:**
-- `Replace` — Меняет все email-адреса из текста на указанное значение.
-- `Parse` — Получение коллекции email-адресов, хранящихся в тексте.
-- `IsValid` — Проверяет email-адрес на валидность.
-
-### Примеры кода
-Замена:
-```C#
-string textForFormatEmails = EmailsParser.Replace(textWithEmails, "{0}");
-```
-
-Получение коллекции:
-```C#
-List<string> emails = EmailsParser.Parse(textWithEmails);
-```
-
-## HtmlHelper
-### Назначение
-Вспомогательный класс, для работы с HTML-текстом.
-
-### Структура
-**Константы:**
-- `TagRegex` — Регулярное выражение для поиска тегов в тексте
-
-**Методы:**
-- `TagsClear` — Очищает строку от тегов.
-
-### Примеры кода
-```C#
-string html = ...;
-string textFromHtmlWithoutTags = HtmlHelper.TagsClear(html);
-
-// Пример вывода:
-// Инклюзия\r\nБезопасность
-```
-
-## MessageBox
-### Назначение
-Класс и набор перечислений, предназначенный для работы с окнами уведомлений в проектах, не подразумевающих работу на базе фреймворков графических интерфейсов.
-
-### Структура
-**Статический класс `MessageBox`:**
- - `Show` — Метод вывода окна уведомлений. Принимает текст уведомления, заголовок окна и его тип (битовое поле `MessageBoxType`).
-
-**Битовое поле `MessageBoxType`:**
- - `Window` — Типы окон:
-     - `Ok` — Только кнопка "Ок".
-     - `OkCancel` — Кнопки "Ок" и "Закрыть".
-     - `AbortRetryIgnore` — Кнопки "Прервать", "Повторить" и "Пропустить".
-     - `YesNoCancel` — Кнопки "Да", "Нет" и "Закрыть".
-     - `YesNo` — Кнопки "Да" и "Нет".
-     - `RetryCancel` — Кнопки "Повторить" и "Закрыть".
-     - `CancelTryContinue` — Кнопки "Закрыть", "Повторить" и "Продолжить".
- - `DefaultButton` — Выбранная кнопка по умолчанию:
-     - `1` — Первая кнопка выбрана по умолчанию.
-     - `2` — Соответственно.
-     - `3` — Соответственно.
-     - `4` — Соответственно.
- - `Icon` — Иконка окна уведомления:
-     - `Error` — Красный знак ошибки.
-     - `Question` — Знак вопроса.
-     - `Warning` — Жёлтый знак предупреждения.
-     - `Information` — Синий информационный знак.
-
-**Статический класс с результатами окна уведомления `MessageBoxResult`:**
- - `Ok`.
- - `Cancel`.
- - `Abort`.
- - `Retry`.
- - `Ignore`.
- - `Yes`.
- - `No`.
- - `Close`.
- - `Help`.
- - `Try`.
- - `Continue`.
-
-### Примеры кода
-```C#
-int result = MessageBox.Show(
-    "Продолжить работу программы?",
-    "Окно уведомлений",
-    MessageBoxType.Window_YesNoCancel | MessageBoxType.DefaultButton_2 | MessageBoxType.Icon_Question);
-
-if (result == MessageBoxResult.Yes)
-    Console.WriteLine("Я каменщик, работаем дальше...");
-else if (result == MessageBoxResult.No)
-    Console.WriteLine("User'а ответ!");
-else
-    return;
-```
-
 ## ObjectExtensions
 ### Назначение
 Статический класс с методами расширения для объектов.
@@ -308,14 +116,23 @@ else
 ### Структура
 **Методы расширения:**
 - `TryCast` — Осуществляет попытку приведения типа, возвращая логическое значение об успехе, и записывающее сам объект в out-параметр. При необходимости вторым out-параметром возвращает сообщение об ошибке приведения типа.
+- `IsNull` — Проверяет значение на равенство `null` и возвращает результат проверки.
+- `IsNotNull` — Проверяет значение на не равенство `null` и возвращает результат проверки.
 
 ### Примеры кода
+`TryCast`:
 ```C#
 object obj = 10;
 bool isCasted = obj.TryCast(out string? str, out string? castingError);
 
 if (!isCasted)
     Console.WriteLine(castingError); // Specified value is not a String
+```
+
+`IsNull`:
+```C#
+if (parameters.Any(p => p.IsNull()))
+    throw new AttributeParametersException(parameters, "Attribute values cannot have null values");
 ```
 
 ## StringExtension
@@ -359,35 +176,6 @@ bool isSuccessFormat = str.TryFormat(out string formatted, 10, 12);
 ```C#
 string str = "{0} {1}";
 var validationResult = str.IsValidForInternalization(2);
-```
-
-## TimerHelper
-### Назначение
-Статический класс предназначенный для использования экспоненциальных таймеров.
-
-### Структура
-**Статические методы:**
- - `ExpWait` — Осуществляет ожидание в зависимости от экспоненциального значения таймера, рассчитанного на основе указанной итерации цикла.
- - `ExpWaitAsync` — Осуществляет асинхронное ожидание в зависимости от экспоненциального значения таймера, рассчитанного на основе указанной итерации цикла.
-
-### Примеры кода
-Без необязательных параметров:
-```C#
-for(int i = 0; i < int.MaxValue; i++)
-{
-    Console.Write($"\rИтерация: {i}");
-    TimerHelper.ExpWait(i);
-    // В зависимости от итерации блокирует поток на разное количество времени
-}
-```
-
-С указанием начального значения таймера и шага:
-```C#
-for(int i = 0; i < int.MaxValue; i++)
-{
-    Console.Write($"\rИтерация: {i}");
-    TimerHelper.ExpWait(i, 6.5, 0.1);
-}
 ```
 
 ## Readyable
@@ -577,6 +365,100 @@ var incrementResult = new Chain<string, string, string>(START_VALUE)
     .Execute();
 ```
 
+## Counter
+### Назначение
+Класс, предназначенный для создания счётчиков.
+
+### Структура
+**Свойства:**
+- `Value` — Значение счётчика.
+- `Name` — Имя счётчика.
+
+**Instance-методы:**
+- `Increment` — Инкрементирование счётчика со стандартным или указанным шагом.
+- `Decrement` — Декрементирование счётчика со стандартным или указанным шагом.
+- `SetValidator` — Установка валидатора допустимых значений (можно лямбдой). При невалидном результате (в том числе при установке валидатора) возникнет исключение `CounterNotValidValueException`, которое имеет следующие свойства:
+    - `Counter` — Счётчик, с которым связано исключение.
+    - `OperationType` — Перечисление, хранящее операцию, которая осуществлялась со счётчиком:
+        - `SetValidator` — Устанавливался валидатор.
+        - `Increment` — Значение счётчика увеличивалось.
+        - `Decrement` — Значение счётчика уменьшалось.
+    - `Step` — Шаг, на который изменялось значение счётчика.
+- `Clone` — Клонирование счётчика.
+- `CompareTo` — Сравнение счётчиков.
+- `Equals` — Проверка счётчика на равенство (по значениям `Name` и `Value`).
+- `GetHashCode` — Переопределён для получения хеш-кода (по значениям `Name` и `Value`).
+- `ToString` —  Преобразование счётчика в строковое значение.
+
+**Статические методы:**
+- `CreateCounter` — Фабрика счётчиков с указанными значениями.
+- `CreateClosuredCounter` — Создание счётчика на основе замыкания.
+
+**Операторы:**
+- `+=` — Увеличивает значение счётчика на указанный шаг.
+- `-=` — Уменьшает значение счётчика на указанный шаг.
+- `++` — Увеличивает значение счётчика на стандартный шаг.
+- `--` — Уменьшает значение счётчика на стандартный шаг.
+- `+ double` — Увеличивает значение счётчика на указанный шаг.
+- `- double` — Уменьшает значение счётчика на указанный шаг.
+- `==` — Проверка счётчика на равенство (по значениям `Name` и `Value`).
+- `!=` — Проверка счётчика на неравенство (по значениям `Name` и `Value`).
+- `>` — Сравнение двух счётчиков с помощью `CompareTo`.
+- `>=` — Сравнение двух счётчиков с помощью `CompareTo`.
+- `<` — Сравнение двух счётчиков с помощью `CompareTo`.
+- `<=` — Сравнение двух счётчиков с помощью `CompareTo`.
+
+**Подписка на события:**
+- `Handler` — Событие, принимающее делегат, который будет вызываться при операциях, изменяющих значение счётчика.
+- `CounterEventHandler` — Делегат `Action<CounterOperationType, long, Counter>`, принимаемый событием `Handler`:
+    - `CounterOperationType` — Тип операции, производимый над счётчиком, всё те же:
+        - `SetValidator` — Установка валидатора (но при установке валидатора событие не вызывается).
+        - `Increment` — Увеличение значения счётчика.
+        - `Decrement` — Уменьшение значения счётчика.
+    - `long` — Шаг, на который изменялся счётчик.
+    - `Counter` — Сам счётчик, связанный с событием.
+
+### Примеры кода
+Со счётчиком на основе замыкания:
+```C#
+var cnt = Counter.CreateClosuredCounter(10);
+for (int i = 0; i < 10; i++)
+    Console.Write(cnt() + " ");
+
+// 10 11 12 13 14 15 16 17 18 19
+```
+
+С обычным счётчиком:
+```C#
+Counter counter = new(value: 0, name: "Подпесчеки");
+counter += 10;
+counter++;
+Console.WriteLine(counter); // "Подпесчеки: 11"
+```
+
+С подпиской на событие:
+```C#
+// Main:
+Counter counter = new(0, "Подпесчеки");
+counter.Handler += CounterEventHandler;
+
+counter
+    .Increment()
+    .Increment(100)
+    .Decrement()
+    .Decrement(12);
+
+// Метод-обработчик (название можно и другое):
+static void CounterEventHandler(CounterOperationType type, long step, Counter counter) =>
+    Console.WriteLine($"Операция: {type, -10} | Шаг: {step, - 10} | Имя счётчика: {counter.Name}");
+
+// Вывод в консоль:
+Операция: Increment  | Шаг: 1          | Имя счётчика: Подпесчеки
+Операция: Increment  | Шаг: 100        | Имя счётчика: Подпесчеки
+Операция: Decrement  | Шаг: 1          | Имя счётчика: Подпесчеки
+Операция: Decrement  | Шаг: 12         | Имя счётчика: Подпесчеки
+```
+
 ## Verifier
 ### Назначение
 Статический класс для проверки объектов, имеющих атрибуты валидации.
@@ -621,9 +503,10 @@ else
 
 ## Custom Attributes
 ### Назначение
-Дополнительные атрибуты для валидации моделей.
+Дополнительные атрибуты для валидации моделей, и шаблон их создания.
 
 ### Структура
+**Дополнительные атрибуты:**
  - `ContainsAttribute` — Проверяет наличие в строке указанной подстроки (поддерживает переопределение сообщения об ошибке с возможностями интернирования подстроки).
  - `InternalizationSupportedAttribute` — Проверяет возможность интернировать в строку количество переменных, указанных в конструкторе атрибута (поддерживает переопределение сообщения об ошибке с возможностями интернирования количества переменных).
 
@@ -644,6 +527,91 @@ public class Something
 ```
 
 О методе валидации подобных моделей подробнее написано в этом [разделе](#verifier).
+
+### Шаблон для создания атрибутов и исключение `AttributeParametersException`
+Абстрактный класс для создания атрибутов валидации `ValidationAttributeTemplate<TAttributeTarget>` требует указания в Generic-параметре типа поля, свойства или класса, валидность которого проверяется, и переопределения следующих методов:
+- `private protected override (bool IsValid, string? Error) IsValidAttributeParameters()` — Проверяет корректность параметров, указанных в самом атрибуте.
+- `private protected override (bool IsValid, string? Error) IsValidTargetValue(TAttributeTarget)` — Проверяет корректность поля, свойства или класса.
+
+Данный класс также поддерживает переопределение стандартных сообщений об ошибках, причём и с интернированием указанных параметров. Для этого необходимо в конструктор передать сообщение об ошибке и сами параметры для интернирования. Если строка поддерживает форматирование указанного количества параметров, они будут включены в итоговое строковое значение. Если параметры не указаны, будет просто возвращена заданная строка с ошибкой. Ну а если не указана сама строка, то будет возвращена ошибка либо из `IsValidTargetValue`, либо стандартное значение `Validation error` в случае возврата `null`.
+
+Если `IsValidAttributeParameters` вернёт `false`, будет выброшено исключение `AttributeParametersException`, которое хранит параметры, указанные в конструкторе базового класса (да, их указание требуется не только для интернирования в сообщение об ошибке).
+
+Пример:
+```C#
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+public class ContainsAttribute : ValidationAttributeTemplate<string>
+{
+    private string _stringForCheckContains;
+
+    // С помощью базового конструктора переопределяется сообщение об ошибке, интернируются указанные парметры и формируется исключение
+    //                                                                                       ↓        ↓                 ↓
+    public ContainsAttribute(string stringForCheckContains, string? errorMessage = null) : base(errorMessage, stringForCheckContains) =>
+        _stringForCheckContains = stringForCheckContains;
+
+    private protected override (bool IsValid, string? Error) IsValidAttributeParameters()
+    {
+        if (string.IsNullOrEmpty(_stringForCheckContains))
+            return (false, "The string whose contents are being checked cannot be empty");
+        else
+            return (true, null);
+    }
+
+    private protected override (bool IsValid, string? Error) IsValidTargetValue(string validable)
+    {
+        if (validable.Contains(_stringForCheckContains))
+            return (true, null);
+        else
+            return (false, $"The string should contain the \"{_stringForCheckContains}\"");
+    }
+}
+```
+
+Разделение проверки валидности на два метода необходимо для соблюдения принципа `SRP`, а также для корректного срабатывания исключений. Если, например, проверку параметров атрибута поставить в конструкторе этого атрибута, то исключения не будут выбрасываться, вместо этого атрибут просто не будет присваиваться, что приведёт к валидности проверяемого типа не зависимо от его значения.
+
+## EmailsParser
+### Назначение
+Класс для работы с текстом, содержащим email-адреса.
+
+### Структура
+**Константы:**
+- `EmailRegex` — Регулярное выражение, для поиска в тексте email-адресов.
+
+**Методы:**
+- `Replace` — Меняет все email-адреса из текста на указанное значение.
+- `Parse` — Получение коллекции email-адресов, хранящихся в тексте.
+- `IsValid` — Проверяет email-адрес на валидность.
+
+### Примеры кода
+Замена:
+```C#
+string textForFormatEmails = EmailsParser.Replace(textWithEmails, "{0}");
+```
+
+Получение коллекции:
+```C#
+List<string> emails = EmailsParser.Parse(textWithEmails);
+```
+
+## HtmlHelper
+### Назначение
+Вспомогательный класс, для работы с HTML-текстом.
+
+### Структура
+**Константы:**
+- `TagRegex` — Регулярное выражение для поиска тегов в тексте
+
+**Методы:**
+- `TagsClear` — Очищает строку от тегов.
+
+### Примеры кода
+```C#
+string html = ...;
+string textFromHtmlWithoutTags = HtmlHelper.TagsClear(html);
+
+// Пример вывода:
+// Инклюзия\r\nБезопасность
+```
 
 ## ConsoleExtension
 ### Назначение
@@ -681,42 +649,60 @@ Thread.Sleep(3000);
 Console.CleanLine();
 ```
 
-## StringCrypt
+## MessageBox
 ### Назначение
-Статический класс для кодирования и декодирования текста при помощи сдвигового шифрования, с поддержкой переформатирования текста в HEX.
+Класс и набор перечислений, предназначенный для работы с окнами уведомлений в проектах, не подразумевающих работу на базе фреймворков графических интерфейсов.
 
 ### Структура
-**Методы расширения:**
- - `Crypt` — Кодирует текст.
- - `Decrypt` — Декодирует текст.
+**Статический класс `MessageBox`:**
+ - `Show` — Метод вывода окна уведомлений. Принимает текст уведомления, заголовок окна и его тип (битовое поле `MessageBoxType`).
 
-Первым параметром указывается числовой ключ для сдвига. Вторым необязательным параметром указывается формат кодирования, представленный перечислением `StringCrypter.Type`:
- - `Hex` — Кодирует текст в HEX, и декодирует HEX-формат в обычный текст.
- - `Std` — Кодирует строку только с помощью сдвиговой шифрации.
+**Битовое поле `MessageBoxType`:**
+ - `Window` — Типы окон:
+     - `Ok` — Только кнопка "Ок".
+     - `OkCancel` — Кнопки "Ок" и "Закрыть".
+     - `AbortRetryIgnore` — Кнопки "Прервать", "Повторить" и "Пропустить".
+     - `YesNoCancel` — Кнопки "Да", "Нет" и "Закрыть".
+     - `YesNo` — Кнопки "Да" и "Нет".
+     - `RetryCancel` — Кнопки "Повторить" и "Закрыть".
+     - `CancelTryContinue` — Кнопки "Закрыть", "Повторить" и "Продолжить".
+ - `DefaultButton` — Выбранная кнопка по умолчанию:
+     - `1` — Первая кнопка выбрана по умолчанию.
+     - `2` — Соответственно.
+     - `3` — Соответственно.
+     - `4` — Соответственно.
+ - `Icon` — Иконка окна уведомления:
+     - `Error` — Красный знак ошибки.
+     - `Question` — Знак вопроса.
+     - `Warning` — Жёлтый знак предупреждения.
+     - `Information` — Синий информационный знак.
 
-По умолчанию во втором параметре указан тип: `Std`.
+**Статический класс с результатами окна уведомления `MessageBoxResult`:**
+ - `Ok`.
+ - `Cancel`.
+ - `Abort`.
+ - `Retry`.
+ - `Ignore`.
+ - `Yes`.
+ - `No`.
+ - `Close`.
+ - `Help`.
+ - `Try`.
+ - `Continue`.
 
 ### Примеры кода
-Со стандартным форматированием:
 ```C#
-string text = "Simple string";
+int result = MessageBox.Show(
+    "Продолжить работу программы?",
+    "Окно уведомлений",
+    MessageBoxType.Window_YesNoCancel | MessageBoxType.DefaultButton_2 | MessageBoxType.Icon_Question);
 
-string crypted = text.Crypt(-10);
-// I_cfb[▬ijh_d]
-
-string decrypted = crypted.Decrypt(10);
-// Simple string
-```
-
-С форматированием в HEX:
-```C#
-string text = "Simple string";
-
-string crypted = text.Crypt(-10, StringCrypter.Type.Hex);
-// 49 5F 63 66 62 5B 16 69 6A 68 5F 64 5D
-
-string decrypted = crypted.Decrypt(10, StringCrypter.Type.Hex);
-// Simple string
+if (result == MessageBoxResult.Yes)
+    Console.WriteLine("Я каменщик, работаем дальше...");
+else if (result == MessageBoxResult.No)
+    Console.WriteLine("User'а ответ!");
+else
+    return;
 ```
 
 ## Reflection
@@ -938,6 +924,19 @@ Reflection.Print(pathAssembly, "Std.Comparator");
 ```
 
 ## История последних изменений
+### v5.0.0
+Удалены:
+- `TimerHelper`.
+- `StringCrypt`.
+
+Изменены:
+- Структура пространства имён.
+- Шаблон для создания атрибутов валидации: был добавлен абстрактный метод `IsValidAttributeParameters` для проверки корректности параметров самого атрибута. Если он возвращает `false`, при вызове стандартного метода атрибута `IsValid` возникнет исключение `AttributeParametersException`.
+
+Добавлены:
+- Само исключение для некорректных параметров атрибута валидации `AttributeParametersException`.
+- Методы в `Core.ObjectExtensions`: `IsNull` и `IsNotNull`.
+
 ### v4.4.0
 Изменения:
 - Все сообщения для исключений переведены на английский язык, как и рефлексивная информация из класса `Specific.Reflection`.
