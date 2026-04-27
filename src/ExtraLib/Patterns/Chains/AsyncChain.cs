@@ -34,7 +34,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
     /// <param name="funcWithCancellationToken">Вызываемая функция</param>
     /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, CancellationToken, Task<Result<TOutput, TError>>> funcWithCancellationToken)
+    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken)
         where TInput : notnull
         where TOutput : notnull
         => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken));
@@ -60,7 +60,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     /// <param name="funcWithCancellationToken">Вызываемая функция</param>
     /// <param name="outParameter">Возвращаемое функцией значение в формате Readyable</param>
     /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, CancellationToken, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter)
+    public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter)
         where TInput : notnull
         where TOutput : notnull
         => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken, out outParameter));
@@ -120,8 +120,5 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
 
         if (asyncOperations.Last!.Value.OutputType != typeof(TOutputData))
             throw new FormatException($"The last type is expected to have a \"{typeof(TOutputData).Name}\"");
-
-        if (asyncOperations.Any(p => p.IsContainsCancellationTokenParameter) && cancellationToken is null)
-            throw new FormatException("When using methods with a completion token, you need to specify the token in the chain constructor");
     }
 }

@@ -8,7 +8,7 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
 
     private readonly string name;
 
-    private Func<TInput, CancellationToken, Task<Result<TOutput, TError>>>? funcWithCancellationToken = null;
+    private Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>>? funcWithCancellationToken = null;
     private Func<TInput, Task<Result<TOutput, TError>>>? funcWithoutCancellationToken = null;
 
     private IReadyable<TOutput>? _outParameter = null;
@@ -16,14 +16,14 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
     // Четыре перегрузки конструктора, с наличием/отсутствием out-параметров и токенов завершения
     internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken) =>
         (this.name, this.InputType, this.OutputType, this.funcWithoutCancellationToken) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken);
-    internal AsyncOperationInfo(Func<TInput, CancellationToken, Task<Result<TOutput, TError>>> funcWithCancellationToken) =>
+    internal AsyncOperationInfo(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken) =>
         (this.name, this.InputType, this.OutputType, this.funcWithCancellationToken) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken);
     internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, out Readyable<TOutput> outParameter)
     {
         (this.name, this.InputType, this.OutputType, this.funcWithoutCancellationToken) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken);
         _outParameter = outParameter = new Readyable<TOutput>(this.name);
     }
-    internal AsyncOperationInfo(Func<TInput, CancellationToken, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter)
+    internal AsyncOperationInfo(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter)
     {
         (this.name, this.InputType, this.OutputType, this.funcWithCancellationToken) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken);
         _outParameter = outParameter = new Readyable<TOutput>(this.name);
@@ -55,7 +55,7 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
 
         // Если в цепочке содержатся функции с токеном в параметре, но не содержится сам токен, будет исключение
         // А если вместе с такими функциями содержится и сам токен, то он будет передан в InvokeAsync
-        var functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken!.Value) : await funcWithoutCancellationToken!(typedInput);
+        var functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken) : await funcWithoutCancellationToken!(typedInput);
 
         lock (_lockObg)
         {
@@ -81,7 +81,7 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
 
         // Если в цепочке содержатся функции с токеном в параметре, но не содержится сам токен, будет исключение
         // А если вместе с такими функциями содержится и сам токен, то он будет передан в InvokeAsync
-        var functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken!.Value) : await funcWithoutCancellationToken!(typedInput);
+        var functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken) : await funcWithoutCancellationToken!(typedInput);
 
         return functionOutput.IsValid ?
             Result<object, TError>.CreateSuccess(functionOutput.Value) :

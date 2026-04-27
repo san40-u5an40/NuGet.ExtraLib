@@ -110,14 +110,14 @@ public static class AsyncChainTests
         await Task.Delay(5);
         cancellationTokenSource.Cancel();
     }
-    private static async Task<Result<int, string>> IncrementWithTokenAsync(int number, CancellationToken cancellationToken)
+    private static async Task<Result<int, string>> IncrementWithTokenAsync(int number, CancellationToken? cancellationToken)
     {
-        if (cancellationToken.IsCancellationRequested)
+        if (cancellationToken is not null && cancellationToken.Value.IsCancellationRequested)
             return Result<int, string>.CreateFailure("Операция прервана по токену");
 
         await Task.Delay(100);
 
-        if (cancellationToken.IsCancellationRequested)
+        if (cancellationToken is not null && cancellationToken.Value.IsCancellationRequested)
             return Result<int, string>.CreateFailure("Операция прервана по токену");
 
         return Result<int, string>.CreateSuccess(++number);

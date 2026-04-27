@@ -7,14 +7,13 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 
-		<AssemblyVersion>5.0.1.0</AssemblyVersion>
-		<FileVersion>5.0.1.0</FileVersion>
-		<Version>5.0.1</Version>
+		<AssemblyVersion>5.0.2.0</AssemblyVersion>
+		<FileVersion>5.0.2.0</FileVersion>
+		<Version>5.0.2</Version>
 		<PackageReleaseNotes>
 			Незначительные улучшения:
-			- `Counter.cs` разбит на несколько файлов.
-			- Удалена лишняя проверка ожидания `Readyable` при интеграции с `Result`.
-			- В `Readme` обновлено именование `StringExtensions`.
+			- Добавлена потокобезопасность в `Counter.cs`.
+			- Ослаблены требования к наличию `CancellationToken` в `AsyncChain.cs`.
 		</PackageReleaseNotes>
 
 		<Title>Extra Libraries</Title>
@@ -23,7 +22,7 @@
 
 		<IsPackable>true</IsPackable>
 		<PackageId>san40_u5an40.$(AssemblyName)</PackageId>
-		<PackageTags>lib;library;classes;библиотека;класы</PackageTags>
+		<PackageTags>lib;library;classes;библиотека;классы</PackageTags>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
