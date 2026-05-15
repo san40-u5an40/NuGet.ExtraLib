@@ -6,6 +6,7 @@
 - [Bytes](#bytes)
 - [Comparator](#comparator)
 - [DefaultConstants](#defaultconstants)
+- [IEnumerableExtensions](#ienumerableextensions)
 - [ObjectExtensions](#objectextensions)
 - [StringExtensions](#stringextensions)
 
@@ -105,6 +106,21 @@ Array.Sort(array, Comparator.GetComparator<User, string>(p => p.Name));
 ### Примеры кода
 ```C#
 Counter counter = new(value: int.RandomPositiveValue, name: string.NotEmpty);
+```
+
+## IEnumerableExtensions
+### Назначение
+Статический класс с методами расширения для перебираемых коллекций.
+
+### Структура
+**Методы расширения:**
+- `IsSorted` — Проверяет отсортированность по возрастанию.
+- `IsSortedDescending` — Проверяет отсортированность по убыванию.
+
+### Примеры кода
+```C#
+List<int> numbers = new() { 1, 2, 3, 4, 10 };
+bool isSorted = numbers.IsSorted(); // true
 ```
 
 ## ObjectExtensions
