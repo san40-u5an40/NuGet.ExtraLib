@@ -7,13 +7,11 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 
-		<AssemblyVersion>5.0.2.0</AssemblyVersion>
-		<FileVersion>5.0.2.0</FileVersion>
-		<Version>5.0.2</Version>
+		<AssemblyVersion>5.1.0.0</AssemblyVersion>
+		<FileVersion>5.1.0.0</FileVersion>
+		<Version>5.1.0</Version>
 		<PackageReleaseNotes>
-			Незначительные улучшения:
-			- Добавлена потокобезопасность в `Counter.cs`.
-			- Ослаблены требования к наличию `CancellationToken` в `AsyncChain.cs`.
+			Добавлены методы расширения для перебираемых коллекций
 		</PackageReleaseNotes>
 
 		<Title>Extra Libraries</Title>

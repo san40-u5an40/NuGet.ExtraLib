@@ -25,9 +25,12 @@ public static class EmailsTests
 
         List<string> emails = EmailsParser.Parse(textWithTwoEmails);
 
-        Assert.That(emails, Has.Count.EqualTo(2));
-        Assert.That(emails, Does.Contain(firstEmail));
-        Assert.That(emails, Does.Contain(secondEmail));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(emails, Has.Count.EqualTo(2));
+            Assert.That(emails, Does.Contain(firstEmail));
+            Assert.That(emails, Does.Contain(secondEmail));
+        }            
     }
 
     [TestCase("alexandr.dev2011@gmail.com", true)]

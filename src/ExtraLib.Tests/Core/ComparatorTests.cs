@@ -8,24 +8,11 @@ public static class ComparatorTests
     public static void Sorting_UnsortedCollections_ReturnSorted(PlayerResult[] playerResultArray)
     {
         Array.Sort(playerResultArray, Comparator.GetComparator<PlayerResult, int>(p => p.Result));
-        bool actual = IsSorted(playerResultArray);
+        bool actual = playerResultArray
+            .Select(p => p.Result)
+            .IsSorted();
 
         Assert.That(actual, Is.True);
-    }
-
-    // Проверяет массив результатов на возрастающую упорядоченность
-    private static bool IsSorted(PlayerResult[] collection)
-    {
-        int pre = int.MinValue;
-
-        for (int i = 0; i < collection.Length; i++)
-        {
-            if (collection[i].Result < pre)
-                return false;
-            pre = collection[i].Result;
-        }
-
-        return true;
     }
 
     // Источник тестовых данных
