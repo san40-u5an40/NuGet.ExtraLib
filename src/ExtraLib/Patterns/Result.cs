@@ -56,12 +56,7 @@ public class Result<TSuccess, TFailure>
     /// <returns>Объект, хранящий данные результата</returns>
     public static Result<TSuccess, TFailure> CreateSuccess(TSuccess success, IReadyable<TSuccess> readyable)
     {
-        using (new Lock().EnterScope())
-        {
-            readyable.Value = success;
-            readyable.ToReady();
-        }
-
+        readyable.ToReady(success);
         return new(true, success, default);
     }
 
@@ -73,9 +68,7 @@ public class Result<TSuccess, TFailure>
     /// <returns>Объект, хранящий данные результата</returns>
     public static Result<TSuccess, TFailure> CreateFailure(TFailure failure, IReadyable<TSuccess> readyable)
     {
-        using (new Lock().EnterScope())
-            readyable.ToNeverBeReady();
-        
+        readyable.ToNeverBeReady();
         return new(false, default, failure);
     }
 }

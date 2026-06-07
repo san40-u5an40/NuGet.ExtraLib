@@ -35,6 +35,24 @@ public static class IEnumerableExtensionsTests
         }
     }
 
+    [TestCaseSource(nameof(CreateCollectionsWith2AndMoreElements))]
+    public static void Have2_Where2AndMoreElements_ReturnTrue(IEnumerable<int> collection)
+    {
+        bool expected = true;
+        bool actual = collection.Have(2);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [TestCaseSource(nameof(CreateCollectionsWith2AndLessElements))]
+    public static void Have3_Where2AndLessElements_ReturnFalse(IEnumerable<int> collection)
+    {
+        bool expected = false;
+        bool actual = collection.Have(3);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
     private static IEnumerable<IEnumerable<int>> CreateSortedAscendingCollections()
     {
         var lists = new List<List<int>>
@@ -64,5 +82,31 @@ public static class IEnumerableExtensionsTests
     private static IEnumerable<IEnumerable<int>> CreateUnsortedAscendingCollections()
     {
         yield return new List<int> { 1, 2, 1, 3, 4, 5 };
+    }
+
+    private static IEnumerable<IEnumerable<int>> CreateCollectionsWith2AndMoreElements()
+    {
+        var lists = new List<List<int>>
+        {
+            new List<int> { 1, 1 },
+            new List<int> { 1, 1, 1 },
+            new List<int> { 1, 1, 1, 1, 1, 1, 1 }
+        };
+
+        foreach (var list in lists)
+            yield return list;
+    }
+
+    private static IEnumerable<IEnumerable<int>> CreateCollectionsWith2AndLessElements()
+    {
+        var lists = new List<List<int>>
+        {
+            new List<int> { },
+            new List<int> { 1 },
+            new List<int> { 1, 1 }
+        };
+
+        foreach (var list in lists)
+            yield return list;
     }
 }

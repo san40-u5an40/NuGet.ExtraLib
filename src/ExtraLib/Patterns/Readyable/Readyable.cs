@@ -75,7 +75,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
         if (!IsWaiting)
             throw new ReadyableException(message, State, name);
     }
-    void IReadyable<TValue>.ThrowIfNotWaiting() => ThrowIfNotWaiting();          // Microsoft, добавьте реализацию сразу двух интерфейсных методов одним методом с необязательным параметром
+    void IReadyable<TValue>.ThrowIfNotWaiting() => ThrowIfNotWaiting();
 
     /// <summary>
     /// Выбрасывает исключение, если объект не находится в состоянии готовности
@@ -87,7 +87,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
         if (!IsReady)
             throw new ReadyableException(message, State, name);
     }
-    void IReadyable<TValue>.ThrowIfNotReady() => ThrowIfNotReady();              // Microsoft, добавьте реализацию сразу двух интерфейсных методов одним методом с необязательным параметром
+    void IReadyable<TValue>.ThrowIfNotReady() => ThrowIfNotReady();
 
     /// <summary>
     /// Выбрасывает исключение, если значение объекта не инициализировано
@@ -109,6 +109,21 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
         {
             ThrowIfNotInitialized();
             ThrowIfNotWaiting();
+            State = ReadyableState.Ready;
+        }
+    }
+
+    // Управлять состоянием объекта допустимо через интерфейсную переменную (небольшой механизм защиты от необдуманного вмешательства)
+    // Приводит объект в состояние готовности и устанавливает окончательное значение
+    void IReadyable<TValue>.ToReady(TValue val)
+    {
+        lock (_syncObj)
+        {
+            ThrowIfNotWaiting();
+
+            _value = val;
+            IsInitialized = true;
+
             State = ReadyableState.Ready;
         }
     }

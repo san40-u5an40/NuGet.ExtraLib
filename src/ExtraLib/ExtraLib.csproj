@@ -7,11 +7,16 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 
-		<AssemblyVersion>5.1.0.0</AssemblyVersion>
-		<FileVersion>5.1.0.0</FileVersion>
-		<Version>5.1.0</Version>
+		<AssemblyVersion>5.2.0.0</AssemblyVersion>
+		<FileVersion>5.2.0.0</FileVersion>
+		<Version>5.2.0</Version>
 		<PackageReleaseNotes>
-			Добавлены методы расширения для перебираемых коллекций
+			Добавлены:
+			- Метод bool IEnumerable`T.Have(int), который проверяет наличие в коллекции указанного количества элементов. Более оптимален, чем проверки с полным перебором коллекции методом Count().
+			- Метод void IReadyable`TValue.ToReady(TValue), который устанавливает значение и меняет состояние на «готов» под одним монитором синхронизации.
+
+			Изменены:
+			- Из Result.CreateFailure и Result.CreateSuccess убраны лишние мониторы синхронизации.
 		</PackageReleaseNotes>
 
 		<Title>Extra Libraries</Title>

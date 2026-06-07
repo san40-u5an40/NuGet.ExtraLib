@@ -21,5 +21,6 @@ public interface IReadyable<TValue>
     public void ThrowIfNotInitialized();
     public void ThrowIfNotInitialized(string message);
     public void ToReady();
+    public void ToReady(TValue val);
     public void ToNeverBeReady();
 }

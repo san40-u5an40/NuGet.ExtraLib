@@ -116,11 +116,19 @@ Counter counter = new(value: int.RandomPositiveValue, name: string.NotEmpty);
 **Методы расширения:**
 - `IsSorted` — Проверяет отсортированность по возрастанию.
 - `IsSortedDescending` — Проверяет отсортированность по убыванию.
+- `Have` — Проверяет наличие в коллекции указанного количества элементов. Более оптимален, чем проверки с полным перебором коллекции методом `Count`.
 
 ### Примеры кода
+`IsSorted`:
 ```C#
 List<int> numbers = new() { 1, 2, 3, 4, 10 };
 bool isSorted = numbers.IsSorted(); // true
+```
+
+`Have`:
+```C#
+if (!collection.Have(2))
+    return true;
 ```
 
 ## ObjectExtensions
@@ -216,7 +224,7 @@ var validationResult = str.IsValidForInternalization(2);
 - `ThrowIfNotInitialized` — Выбрасывает исключение, если значение объекта не инициализировано.
 - `ThrowIfNotWaiting` — Выбрасывает исключение, если объект не ожидает значение.
 - `ThrowIfNotReady` — Выбрасывает исключение, если объект не находится в состоянии готовности.
-- `ToReady` (Только явное использование) — Приводит объект в состояние готовности.
+- `ToReady` (Только явное использование) — Приводит объект в состояние готовности. Можно указать итоговое значение объекта.
 - `ToNeverBeReady` (Только явное использование) — Приводит объект в состояние, в котором он уже не будет готов никогда.
 
 **Ассоциированное с этим классом исключение `ReadyableException`:**
@@ -232,8 +240,7 @@ var validationResult = str.IsValidForInternalization(2);
 При успешном выполнении какой-то операции, например:
 ```C#
 // Внутри какого-то метода
-readyable.Value = 3;
-((IReadyable<int>)readyable).ToReady(); // Явное использование для небольшой защиты от лишнего вмешательства
+((IReadyable<int>)readyable).ToReady(3); // Явное использование для небольшой защиты от лишнего вмешательства
 
 // Где-нибудь снаружи
 int value = readyable.IsReady ? readyable.Value : default;
@@ -242,7 +249,7 @@ int value = readyable.IsReady ? readyable.Value : default;
 При какой-нибудь ошибке:
 ```C#
 if (somethingBad)
-    return ((IReadyable<int>)readyable).ToNeverBeReady();
+    ((IReadyable<int>)readyable).ToNeverBeReady();
 ```
 
 ## Result

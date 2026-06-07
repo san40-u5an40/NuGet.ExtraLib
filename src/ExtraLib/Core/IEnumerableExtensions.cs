@@ -26,7 +26,7 @@ public static class IEnumerableExtensions
     private static bool IsSorted<T>(this IEnumerable<T> collection, bool isAscending)
         where T : IComparable<T>
     {
-        if (collection.Count() <= 1)
+        if (!collection.Have(2))
             return true;
 
         IEnumerator<T> enumerator = collection.GetEnumerator();
@@ -46,5 +46,24 @@ public static class IEnumerableExtensions
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Метод для проверки наличия в коллекции указанного количества элементов
+    /// </summary>
+    /// <typeparam name="T">Тип элементов коллекции</typeparam>
+    /// <param name="collection">Коллекция</param>
+    /// <param name="minimalSize">Требуемое количество элементов</param>
+    /// <returns>Индикатор наличия в коллекции указанного количества элементов</returns>
+    public static bool Have<T>(this IEnumerable<T> collection, int minimalSize)
+    {
+        IEnumerator<T> enumerator = collection.GetEnumerator();
+        int cnt = 0;
+
+        while(enumerator.MoveNext())
+            if (++cnt >= minimalSize)
+                return true;
+
+        return false;
     }
 }
