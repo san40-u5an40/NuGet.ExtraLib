@@ -29,7 +29,7 @@ public class HtmlHelper
             .ReplaceWhileContain("  ", " ")
             .ReplaceWhileContain("\n ", "\n")
             .ReplaceWhileContain("\r\n\r\n", "\r\n")
-            .ReplaceWhileContain("\n\n", "\n\n")
+            .ReplaceWhileContain("\n\n", "\n")
             .Trim('\r', '\n', ' ');
     }
 }
