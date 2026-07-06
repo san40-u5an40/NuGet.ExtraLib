@@ -3,6 +3,7 @@
 /// <summary>
 /// Окно с сообщением
 /// </summary>
+[SupportedOSPlatform("Windows")]
 public static class MessageBox
 {
     [DllImport("user32.dll", EntryPoint = "MessageBoxW", CharSet = CharSet.Unicode)]
@@ -17,11 +18,22 @@ public static class MessageBox
     /// <returns>Значение, выбранное пользователем</returns>
     public static int Show(string text, string caption, MessageBoxType type = 0x0000_0000) =>
         Show(IntPtr.Zero, text, caption, (uint)type);
+
+    /// <summary>
+    /// Метод показа окна с сообщением
+    /// </summary>
+    /// <param name="text">Текст, выводимый в окне</param>
+    /// <param name="caption">Заголовок окна</param>
+    /// <param name="options">Настройка параметров окна</param>
+    /// <returns>Значение, выбранное пользователем</returns>
+    public static int Show(string text, string caption, MessageBoxOptions options) =>
+        Show(IntPtr.Zero, text, caption, (uint)options.WindowType | (uint)options.IconType | (uint)options.DefaultButton);
 }
 
 /// <summary>
 /// Битовое поле, хранящее настройки для окна с сообщением
 /// </summary>
+[SupportedOSPlatform("Windows")]
 [Flags]
 public enum MessageBoxType : uint
 {
@@ -45,8 +57,62 @@ public enum MessageBoxType : uint
 }
 
 /// <summary>
+/// Опции окна уведомлений
+/// </summary>
+/// <param name="WindowType">Тип окна уведомлений</param>
+/// <param name="IconType">Тип иконки</param>
+/// <param name="DefaultButton">Изначально выбранная кнопка</param>
+[SupportedOSPlatform("Windows")]
+public record MessageBoxOptions(
+    WindowType WindowType = WindowType.Ok,
+    IconType IconType = IconType.None,
+    DefaultButton DefaultButton = DefaultButton.Button1
+);
+
+/// <summary>
+/// Тип окна
+/// </summary>
+[SupportedOSPlatform("Windows")]
+public enum WindowType : uint
+{
+    Ok = 0x0000_0000,
+    OkCancel = 0x0000_0001,
+    AbortRetryIgnore = 0x0000_0002,
+    YesNoCancel = 0x0000_0003,
+    YesNo = 0x0000_0004,
+    RetryCancel = 0x0000_0005,
+    CancelTryContinue = 0x0000_0006,
+}
+
+/// <summary>
+/// Тип иконки у окна
+/// </summary>
+[SupportedOSPlatform("Windows")]
+public enum IconType : uint
+{
+    None = 0x0000_0000,
+    Error = 0x0000_0010,
+    Question = 0x000_00020,
+    Warning = 0x0000_0030,
+    Information = 0x0000_0040,
+}
+
+/// <summary>
+/// Изначально выбранная кнопка у окна
+/// </summary>
+[SupportedOSPlatform("Windows")]
+public enum DefaultButton : uint
+{
+    Button1 = 0x0000_0000,
+    Button2 = 0x0000_0100,
+    Button3 = 0x0000_0200,
+    Button4 = 0x0000_0300,
+}
+
+/// <summary>
 /// Ввод, указанный пользователем в окне
 /// </summary>
+[SupportedOSPlatform("Windows")]
 public static class MessageBoxResult
 {
     public const int Ok = 1;
