@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ExtraLib.Tests/ExtraLib.Tests.csproj" />
+  <Project Path="ExtraLib/ExtraLib.csproj" />
+</Solution>
