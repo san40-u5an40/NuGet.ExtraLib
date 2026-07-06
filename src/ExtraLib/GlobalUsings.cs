@@ -9,6 +9,7 @@ global using System.Reflection;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Runtime.InteropServices;
 global using System.ComponentModel.DataAnnotations;
+global using System.Runtime.Versioning;
 
 global using san40_u5an40.ExtraLib.Core;
 global using san40_u5an40.ExtraLib.Patterns;

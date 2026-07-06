@@ -2,7 +2,7 @@
 
 public static class AsyncChainTests
 {
-    private const string DOCUMENT_PATH = @".\NumberForAsyncChainTests.txt";
+    private readonly static string DOCUMENT_PATH = $".{Path.DirectorySeparatorChar}NumberForAsyncChainTests.txt";
     private const int DOCUMENT_NUMBER = 3; // Лежит в документе по указанному пути
     private const int EXPECTED = 4;
     private const string ERROR = "Не круто, братан... Вообще не круто...";
