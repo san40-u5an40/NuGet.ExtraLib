@@ -71,4 +71,17 @@ public class Result<TSuccess, TFailure>
         readyable.ToNeverBeReady();
         return new(false, default, failure);
     }
+
+    /// <summary>
+    /// При невалидном результате выполняет указанное действие и завершает работу приложения
+    /// </summary>
+    /// <param name="action">Действие, совершаемое над Result.Error</param>
+    public void ExecuteAndExitIfNotValid(Action<TFailure> action)
+    {
+      if (!IsValid)
+      {
+        action(Error);
+        Environment.Exit(1);
+      }
+    }
 }

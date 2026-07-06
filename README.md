@@ -266,6 +266,9 @@ if (somethingBad)
 - `Value` — Данные валидного результата.
 - `Error` — Данные невалидного результата.
 
+**Обычные методы:**
+- `ExecuteAndExitIfNotValid` — Выполняет действие над `Result.Error` и завершает работу приложения.
+
 **Generic-параметры:**
 - `TSuccess` (первый параметр) — Тип данных, которым будет представлено свойство `Value`.
 - `TFailure` (второй параметр) — Тип данных, которым представлено свойство `Error`.
@@ -273,8 +276,6 @@ if (somethingBad)
 ### Примеры кода
 Стандартное использование:
 ```C#
-using san40_u5an40.ExtraLib.Broad;
-
 var success = Result<string, string>.CreateSuccess("Успешный успех!");
 var failure = Result<string, string>.CreateFailure("Потеря потерь!");
 
@@ -292,8 +293,6 @@ var success = StringResult.CreateSuccess("Успешный успех!");
 
 И конечно же допустимо использовать различные пользовательские типы в качестве Generic-параметров:
 ```C#
-using san40_u5an40.ExtraLib.Broad;
-
 var success = Result<SuccessInfo, FailureInfo>.CreateSuccess(new SuccessInfo("Вася", 25));
 string message =
     success.IsValid ?
@@ -303,6 +302,17 @@ Console.WriteLine(message);
 
 record SuccessInfo(string Name, int Age);
 record FailureInfo(string Message, int ErrorCode);
+```
+
+`ExecuteAndExitIfNotValid`:
+```C#
+var result = Result<string, string>.CreateFailure("FAIL!!!!");
+result.ExecuteAndExitIfNotValid(Console.WriteLine);
+
+Console.WriteLine("Если бы ты не упал, ты бы жил");
+
+// Вывод:
+// FAIL!!!
 ```
 
 ### Интеграция с Readyable
