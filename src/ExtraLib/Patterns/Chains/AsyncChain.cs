@@ -6,9 +6,9 @@
 /// <typeparam name="TInputData">Данные, которые подаются в начало цепочки</typeparam>
 /// <typeparam name="TOutputData">Данные, которые цепочка возвращает в самом конце</typeparam>
 /// <typeparam name="TError">Тип ошибки, которую возвращает цепочка при невалидном результате</typeparam>
-/// <param name="startData">Начальные данные цепочки</param>
-/// <param name="cancellationToken">Токен завершения</param>
-public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, CancellationToken? cancellationToken = null)
+/// <param name="_startData">Начальные данные цепочки</param>
+/// <param name="_cancellationToken">Токен завершения</param>
+public class AsyncChain<TInputData, TOutputData, TError>(TInputData _startData, CancellationToken? _cancellationToken = null)
     where TInputData : notnull
     where TOutputData : notnull
     where TError : notnull
@@ -155,14 +155,14 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
   {
     ThrowIfInvalidList();
 
-    object data = startData;
+    object data = _startData;
 
     foreach (IAsyncInvokable<TError> asyncOperation in _asyncOperations)
     {
-      if (cancellationToken is not null && cancellationToken.Value.IsCancellationRequested)
+      if (_cancellationToken is not null && _cancellationToken.Value.IsCancellationRequested)
         return Result<TOutputData, InvalidAsyncChainResult<TError>>.CreateFailure(new InvalidAsyncChainResult<TError>(InvalidAsyncChainResultType.CancellationTokenRequested));
 
-      var result = await asyncOperation.InvokeAsync(data, cancellationToken);
+      var result = await asyncOperation.InvokeAsync(data, _cancellationToken);
 
       if (!result.IsValid)
         return Result<TOutputData, InvalidAsyncChainResult<TError>>.CreateFailure(new InvalidAsyncChainResult<TError>(InvalidAsyncChainResultType.NotValidMethodResult, result.Error));

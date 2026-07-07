@@ -6,8 +6,8 @@
 /// <typeparam name="TInputData">Данные, которые подаются в начало цепочки</typeparam>
 /// <typeparam name="TOutputData">Данные, которые цепочка возвращает в самом конце</typeparam>
 /// <typeparam name="TError">Тип ошибки, которую возвращает цепочка при невалидном результате</typeparam>
-/// <param name="startData">Начальные данные цепочки</param>
-public class Chain<TInputData, TOutputData, TError>(TInputData startData)
+/// <param name="_startData">Начальные данные цепочки</param>
+public class Chain<TInputData, TOutputData, TError>(TInputData _startData)
     where TInputData : notnull
     where TOutputData : notnull
     where TError : notnull
@@ -100,7 +100,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
   {
     ThrowIfInvalidList();
 
-    object data = startData;
+    object data = _startData;
 
     foreach (IInvokable<TError> operation in _operations)
     {
