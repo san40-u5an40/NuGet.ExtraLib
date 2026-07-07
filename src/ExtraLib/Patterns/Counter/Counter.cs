@@ -5,341 +5,341 @@
 /// </summary>
 public class Counter(long value = 0, string? name = null) : ICloneable, IComparable<Counter>
 {
-    private static readonly int randValueForHashCode = new Random().Next(int.MinValue, int.MaxValue);
-    private HashSet<CounterEventHandler> observers = [];
-    private Predicate<long>? isValid = null;
-    private Lock lockObj = new();
+  private static readonly int randValueForHashCode = new Random().Next(int.MinValue, int.MaxValue);
+  private HashSet<CounterEventHandler> observers = [];
+  private Predicate<long>? isValid = null;
+  private Lock lockObj = new();
 
-    /// <summary>
-    /// Значение счётчика
-    /// </summary>
-    public long Value => value;
+  /// <summary>
+  /// Значение счётчика
+  /// </summary>
+  public long Value => value;
 
-    /// <summary>
-    /// Имя счётчика
-    /// </summary>
-    public string Name => name ?? string.Empty;
+  /// <summary>
+  /// Имя счётчика
+  /// </summary>
+  public string Name => name ?? string.Empty;
 
-    /// <summary>
-    /// Установка валидатора допустимых значений
-    /// </summary>
-    /// <param name="isValid">Метод для определения валидности значения</param>
-    public Counter SetValidator(Predicate<long> isValid)
+  /// <summary>
+  /// Установка валидатора допустимых значений
+  /// </summary>
+  /// <param name="isValid">Метод для определения валидности значения</param>
+  public Counter SetValidator(Predicate<long> isValid)
+  {
+    lock (lockObj)
     {
-        lock(lockObj)
-        {
-            this.isValid = isValid;
+      this.isValid = isValid;
 
-            if (!this.isValid(Value))
-                throw new CounterNotValidValueException(this, CounterOperationType.SetValidator, default);
-        }
-
-        return this;
+      if (!this.isValid(Value))
+        throw new CounterNotValidValueException(this, CounterOperationType.SetValidator, default);
     }
 
-    /// <summary>
-    /// Добавление и удаление обработчиков операций, осуществляемых над счётчиком
-    /// </summary>
-    public event CounterEventHandler Handler
+    return this;
+  }
+
+  /// <summary>
+  /// Добавление и удаление обработчиков операций, осуществляемых над счётчиком
+  /// </summary>
+  public event CounterEventHandler Handler
+  {
+    add => observers.Add(value);
+    remove
     {
-        add => observers.Add(value);
-        remove
-        {
-            lock(lockObj)
-            {
-                if (!observers.Contains(value))
-                    throw new ArgumentException("This delegate is not contained in the collection");
-                observers.Remove(value);
-            }
-        }
+      lock (lockObj)
+      {
+        if (!observers.Contains(value))
+          throw new ArgumentException("This delegate is not contained in the collection");
+        observers.Remove(value);
+      }
+    }
+  }
+
+  /// <summary>
+  /// Инкрементирование счётчика со стандартным шагом
+  /// </summary>
+  /// <exception cref="CounterNotValidValueException">Превышение допустимого максимального значения</exception>
+  public Counter Increment()
+  {
+    lock (lockObj)
+    {
+      long newValue = value + 1;
+
+      if (long.MaxValue - 1 >= value && (isValid is null || isValid(newValue)))
+      {
+        value = newValue;
+        UpdateObservers(CounterOperationType.Increment, 1);
+      }
+      else
+        throw new CounterNotValidValueException(this, CounterOperationType.Increment, 1);
     }
 
-    /// <summary>
-    /// Инкрементирование счётчика со стандартным шагом
-    /// </summary>
-    /// <exception cref="CounterNotValidValueException">Превышение допустимого максимального значения</exception>
-    public Counter Increment()
+    return this;
+  }
+
+  /// <summary>
+  /// Инкрементирование счётчика с указанным шагом
+  /// </summary>
+  /// <param name="step">Шаг увеличения счётчика</param>
+  /// <exception cref="CounterNotValidValueException">Превышение допустимого максимального значения</exception>
+  public Counter Increment(long step)
+  {
+    lock (lockObj)
     {
-        lock (lockObj)
-        {
-            long newValue = value + 1;
+      long newValue = value + step;
 
-            if (long.MaxValue - 1 >= value && (isValid is null || isValid(newValue)))
-            {
-                value = newValue;
-                UpdateObservers(CounterOperationType.Increment, 1);
-            }
-            else
-                throw new CounterNotValidValueException(this, CounterOperationType.Increment, 1);
-        }
-
-        return this;
+      if (long.MaxValue - step >= value && (isValid is null || isValid(newValue)))
+      {
+        value = newValue;
+        UpdateObservers(CounterOperationType.Increment, step);
+      }
+      else
+        throw new CounterNotValidValueException(this, CounterOperationType.Increment, step);
     }
 
-    /// <summary>
-    /// Инкрементирование счётчика с указанным шагом
-    /// </summary>
-    /// <param name="step">Шаг увеличения счётчика</param>
-    /// <exception cref="CounterNotValidValueException">Превышение допустимого максимального значения</exception>
-    public Counter Increment(long step)
+    return this;
+  }
+
+  /// <summary>
+  /// Декрементирование счётчика со стандартным шагом
+  /// </summary>
+  /// <exception cref="CounterNotValidValueException">Значение перешло минимально допустимый порог</exception>
+  public Counter Decrement()
+  {
+    lock (lockObj)
     {
-        lock (lockObj)
-        {
-            long newValue = value + step;
+      long newValue = value - 1;
 
-            if (long.MaxValue - step >= value && (isValid is null || isValid(newValue)))
-            {
-                value = newValue;
-                UpdateObservers(CounterOperationType.Increment, step);
-            }
-            else
-                throw new CounterNotValidValueException(this, CounterOperationType.Increment, step);
-        }
-
-        return this;
+      if (long.MinValue + 1 <= value && (isValid is null || isValid(newValue)))
+      {
+        value = newValue;
+        UpdateObservers(CounterOperationType.Decrement, 1);
+      }
+      else
+        throw new CounterNotValidValueException(this, CounterOperationType.Decrement, 1);
     }
 
-    /// <summary>
-    /// Декрементирование счётчика со стандартным шагом
-    /// </summary>
-    /// <exception cref="CounterNotValidValueException">Значение перешло минимально допустимый порог</exception>
-    public Counter Decrement()
+    return this;
+  }
+
+  /// <summary>
+  /// Декрементирование счётчика с указанным шагом
+  /// </summary>
+  /// <param name="step">Шаг уменьшения счётчика</param>
+  /// <exception cref="CounterNotValidValueException">Значение перешло минимально допустимый порог</exception>
+  public Counter Decrement(long step)
+  {
+    lock (lockObj)
     {
-        lock (lockObj)
-        {
-            long newValue = value - 1;
+      long newValue = value - step;
 
-            if (long.MinValue + 1 <= value && (isValid is null || isValid(newValue)))
-            {
-                value = newValue;
-                UpdateObservers(CounterOperationType.Decrement, 1);
-            }
-            else
-                throw new CounterNotValidValueException(this, CounterOperationType.Decrement, 1);
-        }
-
-        return this;
+      if (long.MinValue + step <= value && (isValid is null || isValid(newValue)))
+      {
+        value = newValue;
+        UpdateObservers(CounterOperationType.Decrement, step);
+      }
+      else
+        throw new CounterNotValidValueException(this, CounterOperationType.Decrement, step);
     }
 
-    /// <summary>
-    /// Декрементирование счётчика с указанным шагом
-    /// </summary>
-    /// <param name="step">Шаг уменьшения счётчика</param>
-    /// <exception cref="CounterNotValidValueException">Значение перешло минимально допустимый порог</exception>
-    public Counter Decrement(long step)
-    {
-        lock (lockObj)
-        {
-            long newValue = value - step;
+    return this;
+  }
 
-            if (long.MinValue + step <= value && (isValid is null || isValid(newValue)))
-            {
-                value = newValue;
-                UpdateObservers(CounterOperationType.Decrement, step);
-            }
-            else
-                throw new CounterNotValidValueException(this, CounterOperationType.Decrement, step);
-        }
+  // Вспомогательный метод для оповещения наблюдателей
+  private void UpdateObservers(CounterOperationType type, long value)
+  {
+    lock (lockObj)
+      foreach (CounterEventHandler action in observers)
+        action(type, value, this);
+  }
 
-        return this;
-    }
+  /// <summary>
+  /// Метод для клонирования счётчика
+  /// </summary>
+  /// <returns>Новый счётчик</returns>
+  public object Clone() =>
+      CreateCounter(value, name);
 
-    // Вспомогательный метод для оповещения наблюдателей
-    private void UpdateObservers(CounterOperationType type, long value)
-    {
-        lock (lockObj)
-            foreach (CounterEventHandler action in observers)
-                action(type, value, this);
-    }
+  /// <summary>
+  /// Метод сравнения счётчиков
+  /// </summary>
+  /// <param name="counter">Счётчик для сравнения</param>
+  /// <returns>Число, означающее соотношение значений счётчиков</returns>
+  /// <exception cref="ArgumentNullException">В качестве значения для сравнения указан null</exception>
+  public int CompareTo(Counter? counter)
+  {
+    ArgumentNullException.ThrowIfNull(counter);
 
-    /// <summary>
-    /// Метод для клонирования счётчика
-    /// </summary>
-    /// <returns>Новый счётчик</returns>
-    public object Clone() =>
-        CreateCounter(value, name);
+    lock (lockObj)
+      return Value.CompareTo(counter.Value);
+  }
 
-    /// <summary>
-    /// Метод сравнения счётчиков
-    /// </summary>
-    /// <param name="counter">Счётчик для сравнения</param>
-    /// <returns>Число, означающее соотношение значений счётчиков</returns>
-    /// <exception cref="ArgumentNullException">В качестве значения для сравнения указан null</exception>
-    public int CompareTo(Counter? counter)
-    {
-        ArgumentNullException.ThrowIfNull(counter);
+  /// <summary>
+  /// Проверка счётчика на равенство
+  /// </summary>
+  /// <param name="obj">Объект для сравнения</param>
+  /// <returns>Логическое значение, отражающее равны ли значения объектов</returns>
+  public override bool Equals(object? obj)
+  {
+    if (obj is not Counter counter)
+      return false;
 
-        lock (lockObj)
-            return Value.CompareTo(counter.Value);
-    }
+    lock (lockObj)
+      return (Value, Name) == (counter.Value, counter.Name);
+  }
 
-    /// <summary>
-    /// Проверка счётчика на равенство
-    /// </summary>
-    /// <param name="obj">Объект для сравнения</param>
-    /// <returns>Логическое значение, отражающее равны ли значения объектов</returns>
-    public override bool Equals(object? obj)
-    {
-        if (obj is not Counter counter)
-            return false;
+  /// <summary>
+  /// Получение хеш-кода объекта
+  /// </summary>
+  /// <returns>Хеш-код</returns>
+  public override int GetHashCode()
+  {
+    lock (lockObj)
+      return HashCode.Combine(Value, Name, randValueForHashCode);
+  }
 
-        lock (lockObj)
-            return (Value, Name) == (counter.Value, counter.Name);
-    }
+  /// <summary>
+  /// Преобразование счётчика в строковое значение
+  /// </summary>
+  /// <returns>Строка с указанием имени (при наличии) и значения</returns>
+  public override string ToString()
+  {
+    lock (lockObj)
+      return $"{(name is null ? string.Empty : name + ": ")}{value}";
+  }
 
-    /// <summary>
-    /// Получение хеш-кода объекта
-    /// </summary>
-    /// <returns>Хеш-код</returns>
-    public override int GetHashCode()
-    {
-        lock(lockObj)
-            return HashCode.Combine(Value, Name, randValueForHashCode);
-    }
+  /// <summary>
+  /// Перегрузка оператора, увеличивающая значение счётчика на указанный шаг
+  /// </summary>
+  /// <param name="number">Шаг увеличения счётчика</param>
+  public void operator +=(long number) =>
+      Increment(number);
 
-    /// <summary>
-    /// Преобразование счётчика в строковое значение
-    /// </summary>
-    /// <returns>Строка с указанием имени (при наличии) и значения</returns>
-    public override string ToString()
-    {
-        lock (lockObj)
-            return $"{(name is null ? string.Empty : name + ": ")}{value}";
-    }
+  /// <summary>
+  /// Перегрузка оператора, уменьшающая значение счётчика на указанный шаг
+  /// </summary>
+  /// <param name="number">Шаг уменьшения счётчика</param>
+  public void operator -=(long number) =>
+      Decrement(number);
 
-    /// <summary>
-    /// Перегрузка оператора, увеличивающая значение счётчика на указанный шаг
-    /// </summary>
-    /// <param name="number">Шаг увеличения счётчика</param>
-    public void operator +=(long number) =>
-        Increment(number);
+  /// <summary>
+  /// Инкрементирование счётчика со стандартным шагом
+  /// </summary>
+  /// <param name="counter">Инкрементируемый счётчик</param>
+  /// <returns>Счётчик с инкрементированным значением</returns>
+  public static Counter operator ++(Counter counter) =>
+      counter.Increment();
 
-    /// <summary>
-    /// Перегрузка оператора, уменьшающая значение счётчика на указанный шаг
-    /// </summary>
-    /// <param name="number">Шаг уменьшения счётчика</param>
-    public void operator -=(long number) =>
-        Decrement(number);
+  /// <summary>
+  /// Декрементирование счётчика со стандартным шагом
+  /// </summary>
+  /// <param name="counter">Декрементируемый счётчик</param>
+  /// <returns>Счётчик с декрементированным значением</returns>
+  public static Counter operator --(Counter counter) =>
+      counter.Decrement();
 
-    /// <summary>
-    /// Инкрементирование счётчика со стандартным шагом
-    /// </summary>
-    /// <param name="counter">Инкрементируемый счётчик</param>
-    /// <returns>Счётчик с инкрементированным значением</returns>
-    public static Counter operator ++(Counter counter) =>
-        counter.Increment();
+  /// <summary>
+  /// Оператор сложения счётчика с числом
+  /// </summary>
+  /// <param name="counter">Счётчик</param>
+  /// <param name="number">Шаг увеличения</param>
+  /// <returns>Увеличенный счётчик</returns>
+  public static Counter operator +(Counter counter, long number) =>
+      counter.Increment(number);
 
-    /// <summary>
-    /// Декрементирование счётчика со стандартным шагом
-    /// </summary>
-    /// <param name="counter">Декрементируемый счётчик</param>
-    /// <returns>Счётчик с декрементированным значением</returns>
-    public static Counter operator --(Counter counter) => 
-        counter.Decrement();
+  /// <summary>
+  /// Оператор вычитания из счётчика числа
+  /// </summary>
+  /// <param name="counter">Счётчик</param>
+  /// <param name="number">Шаг уменьшения</param>
+  /// <returns>Уменьшенный счётчик</returns>
+  public static Counter operator -(Counter counter, long number) =>
+      counter.Decrement(number);
 
-    /// <summary>
-    /// Оператор сложения счётчика с числом
-    /// </summary>
-    /// <param name="counter">Счётчик</param>
-    /// <param name="number">Шаг увеличения</param>
-    /// <returns>Увеличенный счётчик</returns>
-    public static Counter operator +(Counter counter, long number) =>
-        counter.Increment(number);
+  /// <summary>
+  /// Оператор проверки на равенство
+  /// </summary>
+  /// <param name="counter1">Первый счётчик для сравнения</param>
+  /// <param name="counter2">Второй счётчик для сравнения</param>
+  /// <returns>Логическое значение, отражающее равны ли значения счётчиков</returns>
+  /// <exception cref="ArgumentNullException">В параметр передано null-значение</exception>
+  public static bool operator ==(Counter? counter1, Counter? counter2)
+  {
+    ArgumentNullException.ThrowIfNull(counter1);
+    return counter1.Equals(counter2);
+  }
 
-    /// <summary>
-    /// Оператор вычитания из счётчика числа
-    /// </summary>
-    /// <param name="counter">Счётчик</param>
-    /// <param name="number">Шаг уменьшения</param>
-    /// <returns>Уменьшенный счётчик</returns>
-    public static Counter operator -(Counter counter, long number) =>
-        counter.Decrement(number);
+  /// <summary>
+  /// Оператор проверки на неравенство
+  /// </summary>
+  /// <param name="counter1">Первый счётчик для сравнения</param>
+  /// <param name="counter2">Второй счётчик для сравнения</param>
+  /// <returns>Логическое значение, отражающее не равны ли значения счётчиков</returns>
+  /// <exception cref="ArgumentNullException">В параметр передано null-значение</exception>
+  public static bool operator !=(Counter? counter1, Counter? counter2)
+  {
+    ArgumentNullException.ThrowIfNull(counter1);
+    return !counter1.Equals(counter2);
 
-    /// <summary>
-    /// Оператор проверки на равенство
-    /// </summary>
-    /// <param name="counter1">Первый счётчик для сравнения</param>
-    /// <param name="counter2">Второй счётчик для сравнения</param>
-    /// <returns>Логическое значение, отражающее равны ли значения счётчиков</returns>
-    /// <exception cref="ArgumentNullException">В параметр передано null-значение</exception>
-    public static bool operator ==(Counter? counter1, Counter? counter2)
-    {
-        ArgumentNullException.ThrowIfNull(counter1);
-        return counter1.Equals(counter2);
-    }
+  }
 
-    /// <summary>
-    /// Оператор проверки на неравенство
-    /// </summary>
-    /// <param name="counter1">Первый счётчик для сравнения</param>
-    /// <param name="counter2">Второй счётчик для сравнения</param>
-    /// <returns>Логическое значение, отражающее не равны ли значения счётчиков</returns>
-    /// <exception cref="ArgumentNullException">В параметр передано null-значение</exception>
-    public static bool operator !=(Counter? counter1, Counter? counter2)
-    {
-        ArgumentNullException.ThrowIfNull(counter1);
-        return !counter1.Equals(counter2);
+  /// <summary>
+  /// Оператор для сравнения значений счётчика
+  /// </summary>
+  /// <param name="counter1">Первый счётчик для сравнения</param>
+  /// <param name="counter2">Второй счётчик для сравнения</param>
+  /// <returns>Логическое значение, отражающее больше ли первый счётчик по сравнению со вторым</returns>
+  public static bool operator >(Counter counter1, Counter? counter2) =>
+      counter1.CompareTo(counter2) == 1;
 
-    }
+  /// <summary>
+  /// Оператор для сравнения значений счётчика
+  /// </summary>
+  /// <param name="counter1">Первый счётчик для сравнения</param>
+  /// <param name="counter2">Второй счётчик для сравнения</param>
+  /// <returns>Логическое значение, отражающее больше ли либо равен первый счётчик по сравнению со вторым</returns>
+  public static bool operator >=(Counter counter1, Counter? counter2)
+  {
+    int comparing = counter1.CompareTo(counter2);
 
-    /// <summary>
-    /// Оператор для сравнения значений счётчика
-    /// </summary>
-    /// <param name="counter1">Первый счётчик для сравнения</param>
-    /// <param name="counter2">Второй счётчик для сравнения</param>
-    /// <returns>Логическое значение, отражающее больше ли первый счётчик по сравнению со вторым</returns>
-    public static bool operator >(Counter counter1, Counter? counter2) =>
-        counter1.CompareTo(counter2) == 1;
+    return comparing == 1 || comparing == 0;
+  }
 
-    /// <summary>
-    /// Оператор для сравнения значений счётчика
-    /// </summary>
-    /// <param name="counter1">Первый счётчик для сравнения</param>
-    /// <param name="counter2">Второй счётчик для сравнения</param>
-    /// <returns>Логическое значение, отражающее больше ли либо равен первый счётчик по сравнению со вторым</returns>
-    public static bool operator >=(Counter counter1, Counter? counter2)
-    {
-        int comparing = counter1.CompareTo(counter2);
+  /// <summary>
+  /// Оператор для сравнения значений счётчика
+  /// </summary>
+  /// <param name="counter1">Первый счётчик для сравнения</param>
+  /// <param name="counter2">Второй счётчик для сравнения</param>
+  /// <returns>Логическое значение, отражающее меньше ли первый счётчик по сравнению со вторым</returns>
+  public static bool operator <(Counter counter1, Counter? counter2) =>
+      counter1.CompareTo(counter2) == -1;
 
-        return comparing == 1 || comparing == 0;
-    }
+  /// <summary>
+  /// Оператор для сравнения значений счётчика
+  /// </summary>
+  /// <param name="counter1">Первый счётчик для сравнения</param>
+  /// <param name="counter2">Второй счётчик для сравнения</param>
+  /// <returns>Логическое значение, отражающее меньше ли либо равен первый счётчик по сравнению со вторым</returns>
+  public static bool operator <=(Counter counter1, Counter? counter2)
+  {
+    int comparing = counter1.CompareTo(counter2);
 
-    /// <summary>
-    /// Оператор для сравнения значений счётчика
-    /// </summary>
-    /// <param name="counter1">Первый счётчик для сравнения</param>
-    /// <param name="counter2">Второй счётчик для сравнения</param>
-    /// <returns>Логическое значение, отражающее меньше ли первый счётчик по сравнению со вторым</returns>
-    public static bool operator <(Counter counter1, Counter? counter2) =>
-        counter1.CompareTo(counter2) == -1;
+    return comparing == -1 || comparing == 0;
+  }
 
-    /// <summary>
-    /// Оператор для сравнения значений счётчика
-    /// </summary>
-    /// <param name="counter1">Первый счётчик для сравнения</param>
-    /// <param name="counter2">Второй счётчик для сравнения</param>
-    /// <returns>Логическое значение, отражающее меньше ли либо равен первый счётчик по сравнению со вторым</returns>
-    public static bool operator <=(Counter counter1, Counter? counter2)
-    {
-        int comparing = counter1.CompareTo(counter2);
+  /// <summary>
+  /// Фабрика счётчиков с указанными значениями
+  /// </summary>
+  /// <param name="value">Значение счётчика</param>
+  /// <param name="name">Имя счётчика</param>
+  /// <returns>Счётчик с указанными значениями</returns>
+  public static Counter CreateCounter(long value, string? name = null) =>
+      new(value, name);
 
-        return comparing == -1 || comparing == 0;
-    }
-
-    /// <summary>
-    /// Фабрика счётчиков с указанными значениями
-    /// </summary>
-    /// <param name="value">Значение счётчика</param>
-    /// <param name="name">Имя счётчика</param>
-    /// <returns>Счётчик с указанными значениями</returns>
-    public static Counter CreateCounter(long value, string? name = null) =>
-        new(value, name);
-
-    /// <summary>
-    /// Метод создания счётчика на основе замыкания
-    /// </summary>
-    /// <param name="startValue">Стартовое значение счётчика</param>
-    /// <returns>Функция, вызов которой возвращает значение, которое затем будет инкрементированно</returns>
-    public static Func<long> CreateClosuredCounter(long startValue) =>
-        () => startValue++;
+  /// <summary>
+  /// Метод создания счётчика на основе замыкания
+  /// </summary>
+  /// <param name="startValue">Стартовое значение счётчика</param>
+  /// <returns>Функция, вызов которой возвращает значение, которое затем будет инкрементированно</returns>
+  public static Func<long> CreateClosuredCounter(long startValue) =>
+      () => startValue++;
 }

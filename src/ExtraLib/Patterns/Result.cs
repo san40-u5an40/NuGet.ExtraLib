@@ -10,78 +10,78 @@ public class Result<TSuccess, TFailure>
     where TSuccess : notnull
     where TFailure : notnull
 {
-    private readonly bool isValid;
-    private readonly TSuccess? success;
-    private readonly TFailure? failure;
+  private readonly bool isValid;
+  private readonly TSuccess? success;
+  private readonly TFailure? failure;
 
-    private Result(bool isValid, TSuccess? success, TFailure? failure) =>
-        (this.isValid, this.success, this.failure) = (isValid, success, failure);
+  private Result(bool isValid, TSuccess? success, TFailure? failure) =>
+      (this.isValid, this.success, this.failure) = (isValid, success, failure);
 
-    /// <summary>
-    /// Свойство, хранящее сведенья об успешности выполненной операции, валидности результата
-    /// </summary>
-    public bool IsValid => isValid;
-    
-    /// <summary>
-    /// Свойство, хранящее данные при валидном результате
-    /// </summary>
-    public TSuccess Value => isValid ? success! : throw new InvalidOperationException("If the result is invalid, accessing the result value is not allowed");
+  /// <summary>
+  /// Свойство, хранящее сведенья об успешности выполненной операции, валидности результата
+  /// </summary>
+  public bool IsValid => isValid;
 
-    /// <summary>
-    /// Свойство, хранящее данные при невалидном результате
-    /// </summary>
-    public TFailure Error => !isValid ? failure! : throw new InvalidOperationException("If the result is valid, you cannot access the error information");
+  /// <summary>
+  /// Свойство, хранящее данные при валидном результате
+  /// </summary>
+  public TSuccess Value => isValid ? success! : throw new InvalidOperationException("If the result is invalid, accessing the result value is not allowed");
 
-    /// <summary>
-    /// Статический метод создания валидного результата
-    /// </summary>
-    /// <param name="success">Данные валидного результата</param>
-    /// <returns>Объект, хранящий данные результата</returns>
-    public static Result<TSuccess, TFailure> CreateSuccess(TSuccess success) =>
-        new(true, success, default);
+  /// <summary>
+  /// Свойство, хранящее данные при невалидном результате
+  /// </summary>
+  public TFailure Error => !isValid ? failure! : throw new InvalidOperationException("If the result is valid, you cannot access the error information");
 
-    /// <summary>
-    /// Статический метод создания невалидного результата
-    /// </summary>
-    /// <param name="failure">Данные невалидного результата</param>
-    /// <returns>Объект, хранящий данные результата</returns>
-    public static Result<TSuccess, TFailure> CreateFailure(TFailure failure) =>
-        new(false, default, failure);
+  /// <summary>
+  /// Статический метод создания валидного результата
+  /// </summary>
+  /// <param name="success">Данные валидного результата</param>
+  /// <returns>Объект, хранящий данные результата</returns>
+  public static Result<TSuccess, TFailure> CreateSuccess(TSuccess success) =>
+      new(true, success, default);
 
-    /// <summary>
-    /// Статический метод создания валидного результата
-    /// </summary>
-    /// <param name="success">Данные валидного результата</param>
-    /// <param name="readyable">Объект, проверяемый на готовность, ассоциированные с этим результатом</param>
-    /// <returns>Объект, хранящий данные результата</returns>
-    public static Result<TSuccess, TFailure> CreateSuccess(TSuccess success, IReadyable<TSuccess> readyable)
+  /// <summary>
+  /// Статический метод создания невалидного результата
+  /// </summary>
+  /// <param name="failure">Данные невалидного результата</param>
+  /// <returns>Объект, хранящий данные результата</returns>
+  public static Result<TSuccess, TFailure> CreateFailure(TFailure failure) =>
+      new(false, default, failure);
+
+  /// <summary>
+  /// Статический метод создания валидного результата
+  /// </summary>
+  /// <param name="success">Данные валидного результата</param>
+  /// <param name="readyable">Объект, проверяемый на готовность, ассоциированные с этим результатом</param>
+  /// <returns>Объект, хранящий данные результата</returns>
+  public static Result<TSuccess, TFailure> CreateSuccess(TSuccess success, IReadyable<TSuccess> readyable)
+  {
+    readyable.ToReady(success);
+    return new(true, success, default);
+  }
+
+  /// <summary>
+  /// Статический метод создания невалидного результата
+  /// </summary>
+  /// <param name="failure">Данные невалидного результата</param>
+  /// <param name="readyable">Объект, проверяемый на готовность, ассоциированные с этим результатом</param>
+  /// <returns>Объект, хранящий данные результата</returns>
+  public static Result<TSuccess, TFailure> CreateFailure(TFailure failure, IReadyable<TSuccess> readyable)
+  {
+    readyable.ToNeverBeReady();
+    return new(false, default, failure);
+  }
+
+  /// <summary>
+  /// При невалидном результате выполняет указанное действие и завершает работу приложения
+  /// </summary>
+  /// <param name="action">Действие, совершаемое над Result.Error</param>
+  public void ExecuteAndExitIfNotValid(Action<TFailure> action)
+  {
+    if (!IsValid)
     {
-        readyable.ToReady(success);
-        return new(true, success, default);
+      action(Error);
+      Environment.Exit(1);
     }
-
-    /// <summary>
-    /// Статический метод создания невалидного результата
-    /// </summary>
-    /// <param name="failure">Данные невалидного результата</param>
-    /// <param name="readyable">Объект, проверяемый на готовность, ассоциированные с этим результатом</param>
-    /// <returns>Объект, хранящий данные результата</returns>
-    public static Result<TSuccess, TFailure> CreateFailure(TFailure failure, IReadyable<TSuccess> readyable)
-    {
-        readyable.ToNeverBeReady();
-        return new(false, default, failure);
-    }
-
-    /// <summary>
-    /// При невалидном результате выполняет указанное действие и завершает работу приложения
-    /// </summary>
-    /// <param name="action">Действие, совершаемое над Result.Error</param>
-    public void ExecuteAndExitIfNotValid(Action<TFailure> action)
-    {
-      if (!IsValid)
-      {
-        action(Error);
-        Environment.Exit(1);
-      }
-    }
+  }
 }

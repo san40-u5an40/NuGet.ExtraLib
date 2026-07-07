@@ -5,7 +5,7 @@
 /// </summary>
 public enum ReadyableState : short
 {
-    NeverBeReady = -1,
-    Waiting      =  0,
-    Ready        =  1
+  NeverBeReady = -1,
+  Waiting = 0,
+  Ready = 1
 }

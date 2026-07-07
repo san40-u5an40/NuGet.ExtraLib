@@ -8,13 +8,13 @@
 /// <param name="name">Имя объекта</param>
 public class ReadyableException(string? message = null, ReadyableState? state = null, string? name = null) : InvalidOperationException(message)
 {
-    /// <summary>
-    /// Имя объекта
-    /// </summary>
-    public string? Name => name;
+  /// <summary>
+  /// Имя объекта
+  /// </summary>
+  public string? Name => name;
 
-    /// <summary>
-    /// Состояние объекта
-    /// </summary>
-    public ReadyableState? State => state;
+  /// <summary>
+  /// Состояние объекта
+  /// </summary>
+  public ReadyableState? State => state;
 }

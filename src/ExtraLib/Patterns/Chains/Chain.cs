@@ -12,116 +12,116 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     where TOutputData : notnull
     where TError : notnull
 {
-    private LinkedList<IInvokable<TError>> operations = new();
+  private LinkedList<IInvokable<TError>> operations = new();
 
-    /// <summary>
-    /// Метод для добавления функции/метода в цепочку
-    /// </summary>
-    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
-    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
-    /// <param name="func">Вызываемая функция</param>
-    /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func)
-        where TInput : notnull
-        where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, false));
+  /// <summary>
+  /// Метод для добавления функции/метода в цепочку
+  /// </summary>
+  /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+  /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+  /// <param name="func">Вызываемая функция</param>
+  /// <returns>Экземпляр цепочки (Fluent API)</returns>
+  public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func)
+      where TInput : notnull
+      where TOutput : notnull
+      => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, false));
 
-    /// <summary>
-    /// Метод для добавления функции/метода в цепочку с out-параметром
-    /// </summary>
-    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
-    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
-    /// <param name="func">Вызываемая функция</param>
-    /// <param name="readyable">Возвращаемое функцией значение в формате Readyable</param>
-    /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> readyable)
-        where TInput : notnull
-        where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, out readyable, false));
+  /// <summary>
+  /// Метод для добавления функции/метода в цепочку с out-параметром
+  /// </summary>
+  /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+  /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+  /// <param name="func">Вызываемая функция</param>
+  /// <param name="readyable">Возвращаемое функцией значение в формате Readyable</param>
+  /// <returns>Экземпляр цепочки (Fluent API)</returns>
+  public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> readyable)
+      where TInput : notnull
+      where TOutput : notnull
+      => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, out readyable, false));
 
-    /// <summary>
-    /// Метод для добавления зацикленной функции в цепочку
-    /// </summary>
-    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
-    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
-    /// <param name="func">Вызываемая функция</param>
-    /// <param name="errorHandler">Обработчик невалидных результатов</param>
-    /// <param name="attempts">Количество попыток для валидного завершения функции</param>
-    /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public Chain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, Action<TError> errorHandler, uint attempts = 5)
-        where TInput : notnull
-        where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, true, errorHandler, attempts));
+  /// <summary>
+  /// Метод для добавления зацикленной функции в цепочку
+  /// </summary>
+  /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+  /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+  /// <param name="func">Вызываемая функция</param>
+  /// <param name="errorHandler">Обработчик невалидных результатов</param>
+  /// <param name="attempts">Количество попыток для валидного завершения функции</param>
+  /// <returns>Экземпляр цепочки (Fluent API)</returns>
+  public Chain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, Action<TError> errorHandler, uint attempts = 5)
+      where TInput : notnull
+      where TOutput : notnull
+      => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, true, errorHandler, attempts));
 
-    /// <summary>
-    /// Метод для добавления зацикленной функции в цепочку с out-параметром
-    /// </summary>
-    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
-    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
-    /// <param name="func">Вызываемая функция</param>
-    /// <param name="readyable">Возвращаемое функцией значение в формате Readyable</param>
-    /// <param name="errorHandler">Обработчик невалидных результатов</param>
-    /// <param name="attempts">Количество попыток для валидного завершения функции</param>
-    /// <returns>Экземпляр цепочки (Fluent API)</returns>
-    public Chain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> readyable, Action<TError> errorHandler, uint attempts = 5)
-        where TInput : notnull
-        where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, out readyable, true, errorHandler, attempts));
+  /// <summary>
+  /// Метод для добавления зацикленной функции в цепочку с out-параметром
+  /// </summary>
+  /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+  /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+  /// <param name="func">Вызываемая функция</param>
+  /// <param name="readyable">Возвращаемое функцией значение в формате Readyable</param>
+  /// <param name="errorHandler">Обработчик невалидных результатов</param>
+  /// <param name="attempts">Количество попыток для валидного завершения функции</param>
+  /// <returns>Экземпляр цепочки (Fluent API)</returns>
+  public Chain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> readyable, Action<TError> errorHandler, uint attempts = 5)
+      where TInput : notnull
+      where TOutput : notnull
+      => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, out readyable, true, errorHandler, attempts));
 
-    // Общая часть для двух перегрузок метода AddMethod
-    // Проверяет операцию на валидность
-    // И если всё хорошо, то добавляет её в конец списка
-    private Chain<TInputData, TOutputData, TError> ThrowIfInvalidAndAddLast<TInput, TOutput>(OperationInfo<TInput, TOutput, TError> operation)
-        where TInput : notnull
-        where TOutput : notnull
+  // Общая часть для двух перегрузок метода AddMethod
+  // Проверяет операцию на валидность
+  // И если всё хорошо, то добавляет её в конец списка
+  private Chain<TInputData, TOutputData, TError> ThrowIfInvalidAndAddLast<TInput, TOutput>(OperationInfo<TInput, TOutput, TError> operation)
+      where TInput : notnull
+      where TOutput : notnull
+  {
+    Type lastOutputType = operations.Count > 0 ? operations.Last!.Value.OutputType : typeof(TInputData);
+    Type operationInputType = operation.InputType;
+
+    if (lastOutputType != operationInputType)
+      throw new FormatException($"The input parameters for the operation \"{operation.Name}\" do not meet the requirements");
+
+    if (operation.IsLoop && operation.Attempts <= 0)
+      throw new FormatException($"Number of attempts less than 1 for \"{operation.Name}\" method is not allowed");
+
+    operations.AddLast(operation);
+    return this;
+  }
+
+  /// <summary>
+  /// Выполнение цепочки операций
+  /// </summary>
+  /// <returns>
+  /// Валидируемый результат:\
+  /// - Если валидный, то свойство Value хранит TOutputData.\
+  /// - Если невалидный, то в свойстве Error хранится TError.
+  /// </returns>
+  public Result<TOutputData, TError> Execute()
+  {
+    ThrowIfInvalidList();
+
+    object data = startData;
+
+    foreach (IInvokable<TError> operation in operations)
     {
-        Type lastOutputType = operations.Count > 0 ? operations.Last!.Value.OutputType : typeof(TInputData);
-        Type operationInputType = operation.InputType;
+      var result = operation.Invoke(data);
 
-        if (lastOutputType != operationInputType)
-            throw new FormatException($"The input parameters for the operation \"{operation.Name}\" do not meet the requirements");
+      if (!result.IsValid)
+        return Result<TOutputData, TError>.CreateFailure(result.Error);
 
-        if (operation.IsLoop && operation.Attempts <= 0)
-            throw new FormatException($"Number of attempts less than 1 for \"{operation.Name}\" method is not allowed");
-
-        operations.AddLast(operation);
-        return this;
+      data = result.Value;
     }
 
-    /// <summary>
-    /// Выполнение цепочки операций
-    /// </summary>
-    /// <returns>
-    /// Валидируемый результат:\
-    /// - Если валидный, то свойство Value хранит TOutputData.\
-    /// - Если невалидный, то в свойстве Error хранится TError.
-    /// </returns>
-    public Result<TOutputData, TError> Execute()
-    {
-        ThrowIfInvalidList();
+    return Result<TOutputData, TError>.CreateSuccess((TOutputData)data);
+  }
 
-        object data = startData;
+  // Проверка списка операций на валидность
+  private void ThrowIfInvalidList()
+  {
+    if (operations.Count == 0)
+      throw new InvalidOperationException("To perform a chain of operations, you must first add operations");
 
-        foreach (IInvokable<TError> operation in operations)
-        {
-            var result = operation.Invoke(data);
-
-            if (!result.IsValid)
-                return Result<TOutputData, TError>.CreateFailure(result.Error);
-
-            data = result.Value;
-        }
-
-        return Result<TOutputData, TError>.CreateSuccess((TOutputData)data);
-    }
-
-    // Проверка списка операций на валидность
-    private void ThrowIfInvalidList()
-    {
-        if (operations.Count == 0)
-            throw new InvalidOperationException("To perform a chain of operations, you must first add operations");
-
-        if (operations.Last!.Value.OutputType != typeof(TOutputData))
-            throw new FormatException($"The last type is expected to have a \"{typeof(TOutputData).Name}\"");
-    }
+    if (operations.Last!.Value.OutputType != typeof(TOutputData))
+      throw new FormatException($"The last type is expected to have a \"{typeof(TOutputData).Name}\"");
+  }
 }

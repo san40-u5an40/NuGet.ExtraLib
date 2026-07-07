@@ -5,7 +5,7 @@
 /// </summary>
 public enum CounterOperationType : ushort
 {
-    SetValidator,
-    Increment,
-    Decrement,
+  SetValidator,
+  Increment,
+  Decrement,
 }

@@ -2,5 +2,5 @@
 internal interface IInvokable<TError> : IChainOperation
     where TError : notnull
 {
-    internal Result<object, TError> Invoke(object input);
+  internal Result<object, TError> Invoke(object input);
 }
