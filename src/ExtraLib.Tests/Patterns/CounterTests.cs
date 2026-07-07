@@ -5,7 +5,7 @@
 public class CounterTests
 {
   private Counter counter1 = new(value: 0);
-  private Counter counter2 = new(value: 20);
+  private readonly Counter counter2 = new(value: 20);
 
   [Test]
   public void Increment_TestCounter_ReturnIncrementedValue()

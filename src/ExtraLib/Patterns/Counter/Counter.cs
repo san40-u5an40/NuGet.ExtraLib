@@ -6,9 +6,9 @@
 public class Counter(long value = 0, string? name = null) : ICloneable, IComparable<Counter>
 {
   private static readonly int randValueForHashCode = new Random().Next(int.MinValue, int.MaxValue);
-  private HashSet<CounterEventHandler> observers = [];
+  private readonly HashSet<CounterEventHandler> observers = [];
   private Predicate<long>? isValid = null;
-  private Lock lockObj = new();
+  private readonly Lock lockObj = new();
 
   /// <summary>
   /// Значение счётчика

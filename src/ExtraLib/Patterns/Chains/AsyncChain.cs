@@ -13,7 +13,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     where TOutputData : notnull
     where TError : notnull
 {
-  private LinkedList<IAsyncInvokable<TError>> asyncOperations = new();
+  private readonly LinkedList<IAsyncInvokable<TError>> asyncOperations = new();
 
   /// <summary>
   /// Метод для добавления асинхронных функции или метода в цепочку

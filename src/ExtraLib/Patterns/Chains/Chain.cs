@@ -12,7 +12,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     where TOutputData : notnull
     where TError : notnull
 {
-  private LinkedList<IInvokable<TError>> operations = new();
+  private readonly LinkedList<IInvokable<TError>> operations = new();
 
   /// <summary>
   /// Метод для добавления функции/метода в цепочку

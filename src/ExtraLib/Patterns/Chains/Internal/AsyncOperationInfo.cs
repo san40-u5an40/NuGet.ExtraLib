@@ -6,12 +6,12 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
 {
   private readonly string name;
 
-  private Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>>? funcWithCancellationToken = null;
-  private Func<TInput, Task<Result<TOutput, TError>>>? funcWithoutCancellationToken = null;
+  private readonly Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>>? funcWithCancellationToken = null;
+  private readonly Func<TInput, Task<Result<TOutput, TError>>>? funcWithoutCancellationToken = null;
 
   private readonly Action<TError>? _errorHandler;
 
-  private IReadyable<TOutput>? _outParameter = null;
+  private readonly IReadyable<TOutput>? _outParameter = null;
 
   // Четыре перегрузки конструктора, с наличием/отсутствием out-параметров и токенов завершения
   internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5) =>

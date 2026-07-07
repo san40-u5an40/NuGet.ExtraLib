@@ -4,8 +4,8 @@ internal class OperationInfo<TInput, TOutput, TError> : IInvokable<TError>
     where TOutput : notnull
     where TError : notnull
 {
-  private IReadyable<TOutput>? _outParameter = null;
-  private Action<TError>? _errorHandler;
+  private readonly IReadyable<TOutput>? _outParameter = null;
+  private readonly Action<TError>? _errorHandler;
 
   // Конструктор для вызова без out-параметров
   internal OperationInfo(Func<TInput, Result<TOutput, TError>> func, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5) =>

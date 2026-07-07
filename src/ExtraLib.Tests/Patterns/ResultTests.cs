@@ -102,8 +102,7 @@ public static class ResultTests
   [Test]
   public static void CreateSuccessResult_WithReadyReadyable_ThrowReadyableException()
   {
-    Readyable<string> readyable = new();
-    readyable.Value = STRING_VALID;
+    Readyable<string> readyable = new() { Value = STRING_VALID };
     ((IReadyable<string>)readyable).ToReady();
 
     Assert.Throws<ReadyableException>(() => { StringResultForTests.CreateSuccess(STRING_VALID, readyable); });

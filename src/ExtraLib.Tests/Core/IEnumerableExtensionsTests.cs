@@ -55,12 +55,12 @@ public static class IEnumerableExtensionsTests
 
   private static IEnumerable<IEnumerable<int>> CreateSortedAscendingCollections()
   {
-    var lists = new List<List<int>>
-        {
-            new List<int> { int.MinValue, int.MinValue, - 123, -12, 0, 0, 0, 12, 12, 12414, 1232134, int.MaxValue, int.MaxValue },
-            new List<int> { },
-            new List<int> { 3000 }
-        };
+    List<List<int>> lists =
+    [
+      [ int.MinValue, int.MinValue, - 123, -12, 0, 0, 0, 12, 12, 12414, 1232134, int.MaxValue, int.MaxValue ],
+      [ ],
+      [ 3000 ]
+    ];
 
     foreach (var list in lists)
       yield return list;
@@ -68,12 +68,12 @@ public static class IEnumerableExtensionsTests
 
   private static IEnumerable<IEnumerable<int>> CreateSortedDescendingCollections()
   {
-    var lists = new List<List<int>>
-        {
-            new List<int> { int.MaxValue, int.MaxValue, 1232134, 12414, 12, 12, 0, 0, -12, -123, int.MinValue, int.MinValue },
-            new List<int> { },
-            new List<int> { 3000 }
-        };
+    List<List<int>> lists =
+    [
+      [ int.MaxValue, int.MaxValue, 1232134, 12414, 12, 12, 0, 0, -12, -123, int.MinValue, int.MinValue ],
+      [ ],
+      [ 3000 ]
+    ];
 
     foreach (var list in lists)
       yield return list;
@@ -86,12 +86,12 @@ public static class IEnumerableExtensionsTests
 
   private static IEnumerable<IEnumerable<int>> CreateCollectionsWith2AndMoreElements()
   {
-    var lists = new List<List<int>>
-        {
-            new List<int> { 1, 1 },
-            new List<int> { 1, 1, 1 },
-            new List<int> { 1, 1, 1, 1, 1, 1, 1 }
-        };
+    List<List<int>> lists =
+    [
+      [ 1, 1 ],
+      [ 1, 1, 1 ],
+      [ 1, 1, 1, 1, 1, 1, 1 ]
+    ];
 
     foreach (var list in lists)
       yield return list;
@@ -99,12 +99,12 @@ public static class IEnumerableExtensionsTests
 
   private static IEnumerable<IEnumerable<int>> CreateCollectionsWith2AndLessElements()
   {
-    var lists = new List<List<int>>
-        {
-            new List<int> { },
-            new List<int> { 1 },
-            new List<int> { 1, 1 }
-        };
+    List<List<int>> lists =
+    [
+      [ ],
+      [ 1 ],
+      [ 1, 1 ]
+    ];
 
     foreach (var list in lists)
       yield return list;

@@ -5,7 +5,7 @@
 /// </summary>
 public static class DefaultConstants
 {
-  private static Random rand = new();
+  private readonly static Random rand = new();
 
   extension(string)
   {

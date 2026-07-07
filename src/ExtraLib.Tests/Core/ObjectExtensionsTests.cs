@@ -8,7 +8,7 @@ public static class ObjectExtensionsTests
     object obj = string.NotEmpty;
     bool expected = true;
 
-    bool actual = obj.TryCast(out string? str);
+    bool actual = obj.TryCast(out string? _);
 
     Assert.That(actual, Is.EqualTo(expected));
   }
@@ -19,7 +19,7 @@ public static class ObjectExtensionsTests
     object obj = 10;
     bool expected = false;
 
-    bool actual = obj.TryCast(out string? str, out string? castingError);
+    bool actual = obj.TryCast(out string? _, out string? castingError);
 
     using (Assert.EnterMultipleScope())
     {
