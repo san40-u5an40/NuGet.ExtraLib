@@ -24,7 +24,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func)
         where TInput : notnull
         where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func));
+        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, false));
 
     /// <summary>
     /// Метод для добавления функции/метода в цепочку с out-параметром
@@ -37,7 +37,36 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     public Chain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> readyable)
         where TInput : notnull
         where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, out readyable));
+        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, out readyable, false));
+
+    /// <summary>
+    /// Метод для добавления зацикленной функции в цепочку
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="func">Вызываемая функция</param>
+    /// <param name="errorHandler">Обработчик невалидных результатов</param>
+    /// <param name="attempts">Количество попыток для валидного завершения функции</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public Chain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, Action<TError> errorHandler, uint attempts = 5)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, true, errorHandler, attempts));
+
+    /// <summary>
+    /// Метод для добавления зацикленной функции в цепочку с out-параметром
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="func">Вызываемая функция</param>
+    /// <param name="readyable">Возвращаемое функцией значение в формате Readyable</param>
+    /// <param name="errorHandler">Обработчик невалидных результатов</param>
+    /// <param name="attempts">Количество попыток для валидного завершения функции</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public Chain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> readyable, Action<TError> errorHandler, uint attempts = 5)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new OperationInfo<TInput, TOutput, TError>(func, out readyable, true, errorHandler, attempts));
 
     // Общая часть для двух перегрузок метода AddMethod
     // Проверяет операцию на валидность
@@ -46,11 +75,14 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
         where TInput : notnull
         where TOutput : notnull
     {
-        Type lastOutputType = operations.Count > 0 ? operations.Last!.Value.OutputType : startData.GetType();
+        Type lastOutputType = operations.Count > 0 ? operations.Last!.Value.OutputType : typeof(TInputData);
         Type operationInputType = operation.InputType;
 
         if (lastOutputType != operationInputType)
             throw new FormatException($"The input parameters for the operation \"{operation.Name}\" do not meet the requirements");
+
+        if (operation.IsLoop && operation.Attempts <= 0)
+            throw new FormatException($"Number of attempts less than 1 for \"{operation.Name}\" method is not allowed");
 
         operations.AddLast(operation);
         return this;

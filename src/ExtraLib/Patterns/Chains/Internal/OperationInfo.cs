@@ -4,17 +4,17 @@ internal class OperationInfo<TInput, TOutput, TError> : IInvokable<TError>
     where TOutput : notnull
     where TError : notnull
 {
-    private readonly Lock _lockObg = new();
     private IReadyable<TOutput>? _outParameter = null;
+    private Action<TError>? _errorHandler;
 
     // Конструктор для вызова без out-параметров
-    internal OperationInfo(Func<TInput, Result<TOutput, TError>> func) =>
-        (Function, InputType, OutputType) = (func, typeof(TInput), typeof(TOutput));
+    internal OperationInfo(Func<TInput, Result<TOutput, TError>> func, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5) =>
+        (Function, InputType, OutputType, IsLoop, _errorHandler, Attempts) = (func, typeof(TInput), typeof(TOutput), isLoop, errorHandler, attempts);
     
     // Конструктор для вызова с out-параметром
-    internal OperationInfo(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> outParameter)
+    internal OperationInfo(Func<TInput, Result<TOutput, TError>> func, out Readyable<TOutput> outParameter, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5)
     {
-        (Function, InputType, OutputType) = (func, typeof(TInput), typeof(TOutput));
+        (Function, InputType, OutputType, IsLoop, _errorHandler, Attempts) = (func, typeof(TInput), typeof(TOutput), isLoop, errorHandler, attempts);
         _outParameter = outParameter = new Readyable<TOutput>(Function.Method.Name);
     }
 
@@ -26,6 +26,12 @@ internal class OperationInfo<TInput, TOutput, TError> : IInvokable<TError>
 
     // Тип выходных данных
     public Type OutputType { get; private init; }
+    
+    // Количество попыток при зацикливании
+    public uint Attempts { get; private init; }
+
+    // Зациклить ли операцию, пока не будет валидный результат, или пока не исчерпаются попытки
+    public bool IsLoop { get; private init; }
 
     // Имя методы
     public string Name => Function.Method.Name;
@@ -33,41 +39,42 @@ internal class OperationInfo<TInput, TOutput, TError> : IInvokable<TError>
     // Вызов хранимой функции в зависимости от наличия out-параметра
     public Result<object, TError> Invoke(object input)
     {
-        return _outParameter == null ?
-            InvokeWithoutOutParameter(input) : 
-            InvokeWithOutParameter(input);
+        bool isOutParameterContain = _outParameter != null;
+        return Invoke(input, isOutParameterContain);
     }
 
-    public Result<object, TError> InvokeWithOutParameter(object input)
+    private Result<object, TError> Invoke(object input, bool isOutParameterContain)
     {
         TInput typedInput = (TInput)input;
-        var functionOutput = Function(typedInput);
-
-        lock (_lockObg)
+        Result<TOutput, TError> functionOutput;
+        
+        if (IsLoop)
         {
-            _outParameter!.ThrowIfNotWaiting();
-
-            if (functionOutput.IsValid)
+            // Через do-while потому что компилятор не знает, что Attempts >= 1 (если бы был for)
+            int i = 0;
+            do
             {
-                _outParameter.Value = functionOutput.Value;
-                _outParameter.ToReady();
-                return Result<object, TError>.CreateSuccess(functionOutput.Value);
+                functionOutput = Function(typedInput);
+                if (functionOutput.IsValid)
+                    break;
+                _errorHandler!(functionOutput.Error);
             }
-            else
-            {
-                _outParameter.ToNeverBeReady();
-                return Result<object, TError>.CreateFailure(functionOutput.Error);
-            }
+            while(++i < Attempts);
         }
-    }
+        else
+          functionOutput = Function(typedInput);
 
-    public Result<object, TError> InvokeWithoutOutParameter(object input)
-    {
-        TInput typedInput = (TInput)input;
-        var functionOutput = Function(typedInput);
-
-        return functionOutput.IsValid ?
-            Result<object, TError>.CreateSuccess(functionOutput.Value) :
-            Result<object, TError>.CreateFailure(functionOutput.Error);
+        if (functionOutput.IsValid)
+        {
+            if (isOutParameterContain)
+                _outParameter!.ToReady(functionOutput.Value);
+            return Result<object, TError>.CreateSuccess(functionOutput.Value);
+        }
+        else
+        {
+            if (isOutParameterContain)
+                _outParameter!.ToNeverBeReady();
+            return Result<object, TError>.CreateFailure(functionOutput.Error);
+        }
     }
 }

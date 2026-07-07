@@ -6,6 +6,8 @@ public static class ChainTests
     private const int RETURNED_FROM_SECOND_METHOD = 3;
     private const string END_VALUE = "three";
     private const string ERROR = "Не круто, братан... Вообще не круто...";
+    private const string SUCCESS = "Успешный успех";
+    private static int _count = 0;
 
     [Test]
     public static void Execute_ValidChain_ReturnValidEndValue()
@@ -55,6 +57,42 @@ public static class ChainTests
         }
     }
 
+    [Test]
+    public static void AddLoopWith3Attempts_WithMethodWhoDoing3Attempt_ReturnTrue()
+    {
+        bool expected = true;
+
+        bool actual = new Chain<string, string, string>(string.NotEmpty)
+          .AddLoop<string, string>(Do3Attempt, Console.WriteLine, 3)
+          .Execute()
+          .IsValid;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+    
+    [Test]
+    public static void AddLoopWith2Attempts_WithMethodWhoDoing3Attempt_ReturnFalse()
+    {
+        bool expected = false;
+
+        bool actual = new Chain<string, string, string>(string.NotEmpty)
+          .AddLoop<string, string>(Do3Attempt, Console.WriteLine, 2)
+          .Execute()
+          .IsValid;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public static void AddLoop_With0Attempts_TrowFormatException()
+    {
+        Assert.Throws<FormatException>(() =>
+        {
+            new Chain<string, string, string>(string.NotEmpty)
+              .AddLoop<string, string>(Do3Attempt, Console.WriteLine, 0);
+        });
+    }
+
     private static Result<int, string> ConvertStringIntoInt(string number) =>
         number switch
     {
@@ -74,6 +112,14 @@ public static class ChainTests
         Result<int, string>.CreateSuccess(++number);
     private static Result<int, string> NotValidResultIncrement(int number) =>
         Result<int, string>.CreateFailure(ERROR);
+
+    private static Result<string, string> Do3Attempt(string str)
+    {
+        if (_count++ < 3)
+          return Result<string, string>.CreateFailure(ERROR);
+
+        return Result<string, string>.CreateSuccess(SUCCESS);
+    }
 
     private static Result<string, string> ConvertIntIntoString(int number) =>
         number switch

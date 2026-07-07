@@ -4,28 +4,28 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
     where TOutput : notnull
     where TError : notnull
 {
-    private readonly Lock _lockObg = new();
-
     private readonly string name;
 
     private Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>>? funcWithCancellationToken = null;
     private Func<TInput, Task<Result<TOutput, TError>>>? funcWithoutCancellationToken = null;
 
+    private readonly Action<TError>? _errorHandler;
+
     private IReadyable<TOutput>? _outParameter = null;
 
     // Четыре перегрузки конструктора, с наличием/отсутствием out-параметров и токенов завершения
-    internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken) =>
-        (this.name, this.InputType, this.OutputType, this.funcWithoutCancellationToken) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken);
-    internal AsyncOperationInfo(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken) =>
-        (this.name, this.InputType, this.OutputType, this.funcWithCancellationToken) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken);
-    internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, out Readyable<TOutput> outParameter)
+    internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5) =>
+        (this.name, this.InputType, this.OutputType, this.funcWithoutCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken, isLoop, errorHandler, attempts);
+    internal AsyncOperationInfo(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5) =>
+        (this.name, this.InputType, this.OutputType, this.funcWithCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken, isLoop, errorHandler, attempts);
+    internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, out Readyable<TOutput> outParameter, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5)
     {
-        (this.name, this.InputType, this.OutputType, this.funcWithoutCancellationToken) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken);
+        (this.name, this.InputType, this.OutputType, this.funcWithoutCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken, isLoop, errorHandler, attempts);
         _outParameter = outParameter = new Readyable<TOutput>(this.name);
     }
-    internal AsyncOperationInfo(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter)
+    internal AsyncOperationInfo(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5)
     {
-        (this.name, this.InputType, this.OutputType, this.funcWithCancellationToken) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken);
+        (this.name, this.InputType, this.OutputType, this.funcWithCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken, isLoop, errorHandler, attempts);
         _outParameter = outParameter = new Readyable<TOutput>(this.name);
     }
 
@@ -40,51 +40,52 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
 
     // Тип выходных данных
     public Type OutputType { get; private init; }
+    //
+    // Количество попыток при зацикливании
+    public uint Attempts { get; private init; }
+
+    // Зациклить ли операцию, пока не будет валидный результат, или пока не исчерпаются попытки
+    public bool IsLoop { get; private init; }
 
     // Вызов хранимой функции в зависимости от наличия out-параметра
     public async Task<Result<object, TError>> InvokeAsync(object input, CancellationToken? cancellationToken = null)
     {
-        return _outParameter == null ?
-            await InvokeWithoutOutParameterAsync(input, cancellationToken) : 
-            await InvokeWithOutParameterAsync(input, cancellationToken);
+        bool isOutParameterContain = _outParameter != null;
+        return await Invoke(input, cancellationToken, isOutParameterContain);
     }
 
-    public async Task<Result<object, TError>> InvokeWithOutParameterAsync(object input, CancellationToken? cancellationToken = null)
+    private async Task<Result<object, TError>> Invoke(object input, CancellationToken? cancellationToken, bool isOutParameterContain)
     {
         TInput typedInput = (TInput)input;
+        Result<TOutput, TError> functionOutput;
 
-        // Если в цепочке содержатся функции с токеном в параметре, но не содержится сам токен, будет исключение
-        // А если вместе с такими функциями содержится и сам токен, то он будет передан в InvokeAsync
-        var functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken) : await funcWithoutCancellationToken!(typedInput);
-
-        lock (_lockObg)
+        if (IsLoop)
         {
-            _outParameter!.ThrowIfNotWaiting();
-
-            if (functionOutput.IsValid)
+            // Через do-while потому что компилятор не знает, что Attempts >= 1 (если бы был for)
+            int i = 0;
+            do
             {
-                _outParameter.Value = functionOutput.Value;
-                _outParameter.ToReady();
-                return Result<object, TError>.CreateSuccess(functionOutput.Value);
+                functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken) : await funcWithoutCancellationToken!(typedInput);
+                if (functionOutput.IsValid)
+                    break;
+                _errorHandler!(functionOutput.Error);
             }
-            else
-            {
-                _outParameter.ToNeverBeReady();
-                return Result<object, TError>.CreateFailure(functionOutput.Error);
-            }
+            while(++i < Attempts);
         }
-    }
+        else
+          functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken) : await funcWithoutCancellationToken!(typedInput);
 
-    public async Task<Result<object, TError>> InvokeWithoutOutParameterAsync(object input, CancellationToken? cancellationToken = null)
-    {
-        TInput typedInput = (TInput)input;
-
-        // Если в цепочке содержатся функции с токеном в параметре, но не содержится сам токен, будет исключение
-        // А если вместе с такими функциями содержится и сам токен, то он будет передан в InvokeAsync
-        var functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken) : await funcWithoutCancellationToken!(typedInput);
-
-        return functionOutput.IsValid ?
-            Result<object, TError>.CreateSuccess(functionOutput.Value) :
-            Result<object, TError>.CreateFailure(functionOutput.Error);
+        if (functionOutput.IsValid)
+        {
+            if (isOutParameterContain)
+                _outParameter!.ToReady(functionOutput.Value);
+            return Result<object, TError>.CreateSuccess(functionOutput.Value);
+        }
+        else
+        {
+            if (isOutParameterContain)
+                _outParameter!.ToNeverBeReady();
+            return Result<object, TError>.CreateFailure(functionOutput.Error);
+        }
     }
 }

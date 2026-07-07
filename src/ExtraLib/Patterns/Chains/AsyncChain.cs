@@ -25,7 +25,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken)
         where TInput : notnull
         where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithoutCancellationToken));
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithoutCancellationToken, false));
 
     /// <summary>
     /// Метод для добавления асинхронных функции или метода в цепочку
@@ -37,7 +37,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken)
         where TInput : notnull
         where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken));
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken, false));
 
     /// <summary>
     /// Метод для добавления асинхронных функции или метода в цепочку, принимающий out-параметр
@@ -50,7 +50,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, out Readyable<TOutput> outParameter)
         where TInput : notnull
         where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithoutCancellationToken, out outParameter));
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithoutCancellationToken, out outParameter, false));
 
     /// <summary>
     /// Метод для добавления асинхронных функции или метода в цепочку, принимающий out-параметр
@@ -63,7 +63,65 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     public AsyncChain<TInputData, TOutputData, TError> AddMethod<TInput, TOutput>(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter)
         where TInput : notnull
         where TOutput : notnull
-        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken, out outParameter));
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken, out outParameter, false));
+
+    /// <summary>
+    /// Метод для добавления асинхронной зацикленной функции в цепочку
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="funcWithoutCancellationToken">Вызываемая функция</param>
+    /// <param name="errorHandler">Обработчик невалидных результатов</param>
+    /// <param name="attempts">Количество попыток для валидного завершения функции</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public AsyncChain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, Action<TError> errorHandler, uint attempts = 5)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithoutCancellationToken, true, errorHandler, attempts));
+
+    /// <summary>
+    /// Метод для добавления асинхронной зацикленной функции в цепочку
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="funcWithCancellationToken">Вызываемая функция</param>
+    /// <param name="errorHandler">Обработчик невалидных результатов</param>
+    /// <param name="attempts">Количество попыток для валидного завершения функции</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public AsyncChain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, Action<TError> errorHandler, uint attempts = 5)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken, true, errorHandler, attempts));
+
+    /// <summary>
+    /// Метод для добавления асинхронной зацикленной функции в цепочку, принимающий out-параметр
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="funcWithoutCancellationToken">Вызываемая функция</param>
+    /// <param name="outParameter">Возвращаемое функцией значение в формате Readyable</param>
+    /// <param name="errorHandler">Обработчик невалидных результатов</param>
+    /// <param name="attempts">Количество попыток для валидного завершения функции</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public AsyncChain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, out Readyable<TOutput> outParameter, Action<TError> errorHandler, uint attempts = 5)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithoutCancellationToken, out outParameter, true, errorHandler, attempts));
+
+    /// <summary>
+    /// Метод для добавления асинхронной зацикленной функции в цепочку, принимающий out-параметр
+    /// </summary>
+    /// <typeparam name="TInput">Тип данных, которые принимает функция</typeparam>
+    /// <typeparam name="TOutput">Тип возвращаемых данных функцией</typeparam>
+    /// <param name="funcWithCancellationToken">Вызываемая функция</param>
+    /// <param name="outParameter">Возвращаемое функцией значение в формате Readyable</param>
+    /// <param name="errorHandler">Обработчик невалидных результатов</param>
+    /// <param name="attempts">Количество попыток для валидного завершения функции</param>
+    /// <returns>Экземпляр цепочки (Fluent API)</returns>
+    public AsyncChain<TInputData, TOutputData, TError> AddLoop<TInput, TOutput>(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter, Action<TError> errorHandler, uint attempts = 5)
+        where TInput : notnull
+        where TOutput : notnull
+        => ThrowIfInvalidAndAddLast(new AsyncOperationInfo<TInput, TOutput, TError>(funcWithCancellationToken, out outParameter, true, errorHandler, attempts));
 
     // Общая часть для двух перегрузок метода AddMethod
     // Проверяет операцию на валидность
@@ -72,11 +130,14 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
         where TInput : notnull
         where TOutput : notnull
     {
-        Type lastOutputType = asyncOperations.Count > 0 ? asyncOperations.Last!.Value.OutputType : startData.GetType();
+        Type lastOutputType = asyncOperations.Count > 0 ? asyncOperations.Last!.Value.OutputType : typeof(TInputData);
         Type operationInputType = asyncOperation.InputType;
 
         if (lastOutputType != operationInputType)
             throw new FormatException($"The input parameters for the operation \"{asyncOperation.Name}\" do not meet the requirements");
+
+        if (asyncOperation.IsLoop && asyncOperation.Attempts <= 0)
+            throw new FormatException($"Number of attempts less than 1 for \"{asyncOperation.Name}\" method is not allowed");
 
         asyncOperations.AddLast(asyncOperation);
         return this;
