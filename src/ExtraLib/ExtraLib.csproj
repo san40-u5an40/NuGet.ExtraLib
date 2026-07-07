@@ -7,16 +7,17 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 
-		<AssemblyVersion>5.2.0.0</AssemblyVersion>
-		<FileVersion>5.2.0.0</FileVersion>
-		<Version>5.2.0</Version>
+		<AssemblyVersion>5.3.0.0</AssemblyVersion>
+		<FileVersion>5.3.0.0</FileVersion>
+		<Version>5.3.0</Version>
 		<PackageReleaseNotes>
-			Добавлены:
-			- Метод bool IEnumerable`T.Have(int), который проверяет наличие в коллекции указанного количества элементов. Более оптимален, чем проверки с полным перебором коллекции методом Count().
-			- Метод void IReadyable`TValue.ToReady(TValue), который устанавливает значение и меняет состояние на «готов» под одним монитором синхронизации.
+      Добавлены:
+        Опции для MessageBox.Show в ООП стилистике;
+        Метод Result.ExecuteAndExitIfNotValid;
+        Метод AddLoop для Chain и AsyncChain;
 
-			Изменены:
-			- Из Result.CreateFailure и Result.CreateSuccess убраны лишние мониторы синхронизации.
+      Изменены:
+        Убрана лишние мониторы синхронизации из Chain и AsyncChain
 		</PackageReleaseNotes>
 
 		<Title>Extra Libraries</Title>
