@@ -10,27 +10,27 @@ public class Result<TSuccess, TFailure>
     where TSuccess : notnull
     where TFailure : notnull
 {
-  private readonly bool isValid;
-  private readonly TSuccess? success;
-  private readonly TFailure? failure;
+  private readonly bool _isValid;
+  private readonly TSuccess? _success;
+  private readonly TFailure? _failure;
 
   private Result(bool isValid, TSuccess? success, TFailure? failure) =>
-      (this.isValid, this.success, this.failure) = (isValid, success, failure);
+      (_isValid, _success, _failure) = (isValid, success, failure);
 
   /// <summary>
   /// Свойство, хранящее сведенья об успешности выполненной операции, валидности результата
   /// </summary>
-  public bool IsValid => isValid;
+  public bool IsValid => _isValid;
 
   /// <summary>
   /// Свойство, хранящее данные при валидном результате
   /// </summary>
-  public TSuccess Value => isValid ? success! : throw new InvalidOperationException("If the result is invalid, accessing the result value is not allowed");
+  public TSuccess Value => _isValid ? _success! : throw new InvalidOperationException("If the result is invalid, accessing the result value is not allowed");
 
   /// <summary>
   /// Свойство, хранящее данные при невалидном результате
   /// </summary>
-  public TFailure Error => !isValid ? failure! : throw new InvalidOperationException("If the result is valid, you cannot access the error information");
+  public TFailure Error => !_isValid ? _failure! : throw new InvalidOperationException("If the result is valid, you cannot access the error information");
 
   /// <summary>
   /// Статический метод создания валидного результата

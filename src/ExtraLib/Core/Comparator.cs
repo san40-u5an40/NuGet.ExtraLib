@@ -20,15 +20,15 @@ public static class Comparator
 
 file class KeySelectorComparer<TSource, TKey> : IComparer<TSource>
 {
-  private readonly Func<TSource, TKey?> keySelector;
-  private readonly Comparer<TKey?> comparer = Comparer<TKey?>.Default;
+  private readonly Func<TSource, TKey?> _keySelector;
+  private readonly Comparer<TKey?> _comparer = Comparer<TKey?>.Default;
 
-  internal KeySelectorComparer(Func<TSource, TKey?> keySelector) => this.keySelector = keySelector;
+  internal KeySelectorComparer(Func<TSource, TKey?> keySelector) => _keySelector = keySelector;
 
   public int Compare(TSource? obj1, TSource? obj2)
   {
     ArgumentNullException.ThrowIfNull(obj1);
     ArgumentNullException.ThrowIfNull(obj2);
-    return comparer.Compare(keySelector(obj1), keySelector(obj2));
+    return _comparer.Compare(_keySelector(obj1), _keySelector(obj2));
   }
 }

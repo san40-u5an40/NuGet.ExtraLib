@@ -4,36 +4,33 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
     where TOutput : notnull
     where TError : notnull
 {
-  private readonly string name;
-
-  private readonly Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>>? funcWithCancellationToken = null;
-  private readonly Func<TInput, Task<Result<TOutput, TError>>>? funcWithoutCancellationToken = null;
-
+  private readonly string _name;
+  private readonly Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>>? _funcWithCancellationToken = null;
+  private readonly Func<TInput, Task<Result<TOutput, TError>>>? _funcWithoutCancellationToken = null;
   private readonly Action<TError>? _errorHandler;
-
   private readonly IReadyable<TOutput>? _outParameter = null;
 
   // Четыре перегрузки конструктора, с наличием/отсутствием out-параметров и токенов завершения
   internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5) =>
-      (this.name, this.InputType, this.OutputType, this.funcWithoutCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken, isLoop, errorHandler, attempts);
+      (_name, InputType, OutputType, _funcWithoutCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken, isLoop, errorHandler, attempts);
   internal AsyncOperationInfo(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5) =>
-      (this.name, this.InputType, this.OutputType, this.funcWithCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken, isLoop, errorHandler, attempts);
+      (_name, InputType, OutputType, _funcWithCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken, isLoop, errorHandler, attempts);
   internal AsyncOperationInfo(Func<TInput, Task<Result<TOutput, TError>>> funcWithoutCancellationToken, out Readyable<TOutput> outParameter, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5)
   {
-    (this.name, this.InputType, this.OutputType, this.funcWithoutCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken, isLoop, errorHandler, attempts);
-    _outParameter = outParameter = new Readyable<TOutput>(this.name);
+    (_name, InputType, OutputType, _funcWithoutCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithoutCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithoutCancellationToken, isLoop, errorHandler, attempts);
+    _outParameter = outParameter = new Readyable<TOutput>(_name);
   }
   internal AsyncOperationInfo(Func<TInput, CancellationToken?, Task<Result<TOutput, TError>>> funcWithCancellationToken, out Readyable<TOutput> outParameter, bool isLoop, Action<TError>? errorHandler = null, uint attempts = 5)
   {
-    (this.name, this.InputType, this.OutputType, this.funcWithCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken, isLoop, errorHandler, attempts);
-    _outParameter = outParameter = new Readyable<TOutput>(this.name);
+    (_name, InputType, OutputType, _funcWithCancellationToken, IsLoop, _errorHandler, Attempts) = (funcWithCancellationToken.Method.Name, typeof(TInput), typeof(TOutput), funcWithCancellationToken, isLoop, errorHandler, attempts);
+    _outParameter = outParameter = new Readyable<TOutput>(_name);
   }
 
   // Имя методы
-  public string Name => name;
+  public string Name => _name;
 
   // Содержится ли в параметрах метода токен для завершения
-  public bool IsContainsCancellationTokenParameter => funcWithCancellationToken is not null;
+  public bool IsContainsCancellationTokenParameter => _funcWithCancellationToken is not null;
 
   // Тип входных данных
   public Type InputType { get; private init; }
@@ -65,7 +62,7 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
       int i = 0;
       do
       {
-        functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken) : await funcWithoutCancellationToken!(typedInput);
+        functionOutput = IsContainsCancellationTokenParameter ? await _funcWithCancellationToken!(typedInput, cancellationToken) : await _funcWithoutCancellationToken!(typedInput);
         if (functionOutput.IsValid)
           break;
         _errorHandler!(functionOutput.Error);
@@ -73,7 +70,7 @@ internal class AsyncOperationInfo<TInput, TOutput, TError> : IAsyncInvokable<TEr
       while (++i < Attempts);
     }
     else
-      functionOutput = IsContainsCancellationTokenParameter ? await funcWithCancellationToken!(typedInput, cancellationToken) : await funcWithoutCancellationToken!(typedInput);
+      functionOutput = IsContainsCancellationTokenParameter ? await _funcWithCancellationToken!(typedInput, cancellationToken) : await _funcWithoutCancellationToken!(typedInput);
 
     if (functionOutput.IsValid)
     {

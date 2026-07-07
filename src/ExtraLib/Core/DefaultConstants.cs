@@ -5,7 +5,7 @@
 /// </summary>
 public static class DefaultConstants
 {
-  private readonly static Random rand = new();
+  private readonly static Random _rand = new();
 
   extension(string)
   {
@@ -35,17 +35,17 @@ public static class DefaultConstants
     /// <summary>
     /// Случайное число
     /// </summary>
-    public static int RandomValue => rand.Next(int.MinValue, int.MaxValue);
+    public static int RandomValue => _rand.Next(int.MinValue, int.MaxValue);
 
     /// <summary>
     /// Случайное положительное число
     /// </summary>
-    public static int RandomPositiveValue => rand.Next(int.Zero, int.MaxValue);
+    public static int RandomPositiveValue => _rand.Next(int.Zero, int.MaxValue);
 
     /// <summary>
     /// Случайное отрицательное число
     /// </summary>
-    public static int RandomNegativeValue => rand.Next(int.MinValue, int.Zero);
+    public static int RandomNegativeValue => _rand.Next(int.MinValue, int.Zero);
 
     /// <summary>
     /// Случайное число от 0 до указанного значения
@@ -58,7 +58,7 @@ public static class DefaultConstants
       if (max < int.Zero)
         throw new FormatException("It is not acceptable to specify a negative value");
 
-      return rand.Next(int.Zero, max);
+      return _rand.Next(int.Zero, max);
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ public static class DefaultConstants
       if (max < min)
         throw new FormatException("The maximum number cannot be less than the minimum");
 
-      return rand.Next(min, max);
+      return _rand.Next(min, max);
     }
   }
 }

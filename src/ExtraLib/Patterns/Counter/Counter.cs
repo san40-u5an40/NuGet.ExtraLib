@@ -5,10 +5,10 @@
 /// </summary>
 public class Counter(long value = 0, string? name = null) : ICloneable, IComparable<Counter>
 {
-  private static readonly int randValueForHashCode = new Random().Next(int.MinValue, int.MaxValue);
-  private readonly HashSet<CounterEventHandler> observers = [];
-  private Predicate<long>? isValid = null;
-  private readonly Lock lockObj = new();
+  private static readonly int _randValueForHashCode = new Random().Next(int.MinValue, int.MaxValue);
+  private readonly Lock _lockObj = new();
+  private readonly HashSet<CounterEventHandler> _observers = [];
+  private Predicate<long>? _isValid = null;
 
   /// <summary>
   /// Значение счётчика
@@ -26,11 +26,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <param name="isValid">Метод для определения валидности значения</param>
   public Counter SetValidator(Predicate<long> isValid)
   {
-    lock (lockObj)
+    lock (_lockObj)
     {
-      this.isValid = isValid;
+      _isValid = isValid;
 
-      if (!this.isValid(Value))
+      if (!_isValid(Value))
         throw new CounterNotValidValueException(this, CounterOperationType.SetValidator, default);
     }
 
@@ -42,14 +42,14 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// </summary>
   public event CounterEventHandler Handler
   {
-    add => observers.Add(value);
+    add => _observers.Add(value);
     remove
     {
-      lock (lockObj)
+      lock (_lockObj)
       {
-        if (!observers.Contains(value))
-          throw new ArgumentException("This delegate is not contained in the collection");
-        observers.Remove(value);
+        if (!_observers.Contains(value))
+          throw new ArgumentException("delegate is not contained in the collection");
+        _observers.Remove(value);
       }
     }
   }
@@ -60,11 +60,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <exception cref="CounterNotValidValueException">Превышение допустимого максимального значения</exception>
   public Counter Increment()
   {
-    lock (lockObj)
+    lock (_lockObj)
     {
       long newValue = value + 1;
 
-      if (long.MaxValue - 1 >= value && (isValid is null || isValid(newValue)))
+      if (long.MaxValue - 1 >= value && (_isValid is null || _isValid(newValue)))
       {
         value = newValue;
         UpdateObservers(CounterOperationType.Increment, 1);
@@ -83,11 +83,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <exception cref="CounterNotValidValueException">Превышение допустимого максимального значения</exception>
   public Counter Increment(long step)
   {
-    lock (lockObj)
+    lock (_lockObj)
     {
       long newValue = value + step;
 
-      if (long.MaxValue - step >= value && (isValid is null || isValid(newValue)))
+      if (long.MaxValue - step >= value && (_isValid is null || _isValid(newValue)))
       {
         value = newValue;
         UpdateObservers(CounterOperationType.Increment, step);
@@ -105,11 +105,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <exception cref="CounterNotValidValueException">Значение перешло минимально допустимый порог</exception>
   public Counter Decrement()
   {
-    lock (lockObj)
+    lock (_lockObj)
     {
       long newValue = value - 1;
 
-      if (long.MinValue + 1 <= value && (isValid is null || isValid(newValue)))
+      if (long.MinValue + 1 <= value && (_isValid is null || _isValid(newValue)))
       {
         value = newValue;
         UpdateObservers(CounterOperationType.Decrement, 1);
@@ -128,11 +128,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <exception cref="CounterNotValidValueException">Значение перешло минимально допустимый порог</exception>
   public Counter Decrement(long step)
   {
-    lock (lockObj)
+    lock (_lockObj)
     {
       long newValue = value - step;
 
-      if (long.MinValue + step <= value && (isValid is null || isValid(newValue)))
+      if (long.MinValue + step <= value && (_isValid is null || _isValid(newValue)))
       {
         value = newValue;
         UpdateObservers(CounterOperationType.Decrement, step);
@@ -147,8 +147,8 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   // Вспомогательный метод для оповещения наблюдателей
   private void UpdateObservers(CounterOperationType type, long value)
   {
-    lock (lockObj)
-      foreach (CounterEventHandler action in observers)
+    lock (_lockObj)
+      foreach (CounterEventHandler action in _observers)
         action(type, value, this);
   }
 
@@ -169,7 +169,7 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   {
     ArgumentNullException.ThrowIfNull(counter);
 
-    lock (lockObj)
+    lock (_lockObj)
       return Value.CompareTo(counter.Value);
   }
 
@@ -183,7 +183,7 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
     if (obj is not Counter counter)
       return false;
 
-    lock (lockObj)
+    lock (_lockObj)
       return (Value, Name) == (counter.Value, counter.Name);
   }
 
@@ -193,8 +193,8 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <returns>Хеш-код</returns>
   public override int GetHashCode()
   {
-    lock (lockObj)
-      return HashCode.Combine(Value, Name, randValueForHashCode);
+    lock (_lockObj)
+      return HashCode.Combine(Value, Name, _randValueForHashCode);
   }
 
   /// <summary>
@@ -203,7 +203,7 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <returns>Строка с указанием имени (при наличии) и значения</returns>
   public override string ToString()
   {
-    lock (lockObj)
+    lock (_lockObj)
       return $"{(name is null ? string.Empty : name + ": ")}{value}";
   }
 

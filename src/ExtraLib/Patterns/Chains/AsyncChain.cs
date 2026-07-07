@@ -13,7 +13,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     where TOutputData : notnull
     where TError : notnull
 {
-  private readonly LinkedList<IAsyncInvokable<TError>> asyncOperations = new();
+  private readonly LinkedList<IAsyncInvokable<TError>> _asyncOperations = new();
 
   /// <summary>
   /// Метод для добавления асинхронных функции или метода в цепочку
@@ -130,7 +130,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
       where TInput : notnull
       where TOutput : notnull
   {
-    Type lastOutputType = asyncOperations.Count > 0 ? asyncOperations.Last!.Value.OutputType : typeof(TInputData);
+    Type lastOutputType = _asyncOperations.Count > 0 ? _asyncOperations.Last!.Value.OutputType : typeof(TInputData);
     Type operationInputType = asyncOperation.InputType;
 
     if (lastOutputType != operationInputType)
@@ -139,7 +139,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
     if (asyncOperation.IsLoop && asyncOperation.Attempts <= 0)
       throw new FormatException($"Number of attempts less than 1 for \"{asyncOperation.Name}\" method is not allowed");
 
-    asyncOperations.AddLast(asyncOperation);
+    _asyncOperations.AddLast(asyncOperation);
     return this;
   }
 
@@ -157,7 +157,7 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
 
     object data = startData;
 
-    foreach (IAsyncInvokable<TError> asyncOperation in asyncOperations)
+    foreach (IAsyncInvokable<TError> asyncOperation in _asyncOperations)
     {
       if (cancellationToken is not null && cancellationToken.Value.IsCancellationRequested)
         return Result<TOutputData, InvalidAsyncChainResult<TError>>.CreateFailure(new InvalidAsyncChainResult<TError>(InvalidAsyncChainResultType.CancellationTokenRequested));
@@ -176,10 +176,10 @@ public class AsyncChain<TInputData, TOutputData, TError>(TInputData startData, C
   // Проверка списка операций на валидность
   private void ThrowIfInvalidList()
   {
-    if (asyncOperations.Count == 0)
+    if (_asyncOperations.Count == 0)
       throw new InvalidOperationException("To perform a chain of operations, you must first add operations");
 
-    if (asyncOperations.Last!.Value.OutputType != typeof(TOutputData))
+    if (_asyncOperations.Last!.Value.OutputType != typeof(TOutputData))
       throw new FormatException($"The last type is expected to have a \"{typeof(TOutputData).Name}\"");
   }
 }

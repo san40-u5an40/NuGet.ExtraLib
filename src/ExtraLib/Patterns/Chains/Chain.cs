@@ -12,7 +12,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     where TOutputData : notnull
     where TError : notnull
 {
-  private readonly LinkedList<IInvokable<TError>> operations = new();
+  private readonly LinkedList<IInvokable<TError>> _operations = new();
 
   /// <summary>
   /// Метод для добавления функции/метода в цепочку
@@ -75,7 +75,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
       where TInput : notnull
       where TOutput : notnull
   {
-    Type lastOutputType = operations.Count > 0 ? operations.Last!.Value.OutputType : typeof(TInputData);
+    Type lastOutputType = _operations.Count > 0 ? _operations.Last!.Value.OutputType : typeof(TInputData);
     Type operationInputType = operation.InputType;
 
     if (lastOutputType != operationInputType)
@@ -84,7 +84,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
     if (operation.IsLoop && operation.Attempts <= 0)
       throw new FormatException($"Number of attempts less than 1 for \"{operation.Name}\" method is not allowed");
 
-    operations.AddLast(operation);
+    _operations.AddLast(operation);
     return this;
   }
 
@@ -102,7 +102,7 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
 
     object data = startData;
 
-    foreach (IInvokable<TError> operation in operations)
+    foreach (IInvokable<TError> operation in _operations)
     {
       var result = operation.Invoke(data);
 
@@ -118,10 +118,10 @@ public class Chain<TInputData, TOutputData, TError>(TInputData startData)
   // Проверка списка операций на валидность
   private void ThrowIfInvalidList()
   {
-    if (operations.Count == 0)
+    if (_operations.Count == 0)
       throw new InvalidOperationException("To perform a chain of operations, you must first add operations");
 
-    if (operations.Last!.Value.OutputType != typeof(TOutputData))
+    if (_operations.Last!.Value.OutputType != typeof(TOutputData))
       throw new FormatException($"The last type is expected to have a \"{typeof(TOutputData).Name}\"");
   }
 }
