@@ -360,6 +360,15 @@ var asyncChainResult = await new AsyncChain<string, int, string>(DOCUMENT_PATH)
     .ExecuteAsync();
 ```
 
+`AddLoop`:
+```C#
+new Chain<string, string, string>(string.NotEmpty)
+  .AddLoop<string, string>(DoSomethingDelegate, Console.WriteLine, 5);
+
+// Если результат будет не валиден, метод повторится, но не больше 5 раз
+// Невалидный результат будет печаться в консоль, в соответствии со вторым переданным делгатом
+```
+
 С проектом, реализованным на базе функциональной цепочки, можно ознакомиться [тут](https://github.com/san40-u5an40/ConsoleUtil.MDParser/blob/main/src/MdParser.App/CLICommands/Abstractions/CommandBase.cs). Также более наглядный пример есть в проекте с тестами.
 
 ### Структура
@@ -372,6 +381,9 @@ var asyncChainResult = await new AsyncChain<string, int, string>(DOCUMENT_PATH)
 
 **Методы цепочки:**
 - `AddMethod` — Добавляет указанные делегат в цепочку (есть поддержка `Readyable` out-параметра).
+    1. `TInput` — Тип получаемых методом данных.
+    2. `TOutput` — Тип возвращаемых методом данных в виде `Result<this, Chain.TError>` или `Task<Result<this, Chain.TError>>` при асинхронных методах.
+- `AddLoop` — Добавляет указанные делегат в цепочку, который при невалидном результате будет повторяться не больше заданного количества раз (также есть поддержка `Readyable` out-параметра).
     1. `TInput` — Тип получаемых методом данных.
     2. `TOutput` — Тип возвращаемых методом данных в виде `Result<this, Chain.TError>` или `Task<Result<this, Chain.TError>>` при асинхронных методах.
 - `Execute/ExecuteAsync` — Выполняет цепочку и возвращает `Result<Chain.TOutputData, Chain.TError>` для обычной цепочки и `Result<Chain.TOutputData, InvalidAsyncChainResult<Chain.TError>>`.
