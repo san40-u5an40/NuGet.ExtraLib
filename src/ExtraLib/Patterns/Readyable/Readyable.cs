@@ -4,8 +4,8 @@
 /// Объект, проверяемый на готовность
 /// </summary>
 /// <typeparam name="TValue">Тип хранимого значения</typeparam>
-/// <param name="name">Имя объекта, проверяемого на готовность</param>
-public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
+/// <param name="_name">Имя объекта, проверяемого на готовность</param>
+public class Readyable<TValue>(string? _name = null) : IReadyable<TValue>
     where TValue : notnull
 {
   private readonly Lock _syncObj = new();
@@ -14,7 +14,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
   /// <summary>
   /// Имя объекта
   /// </summary>
-  public string Name => name ?? string.Empty;
+  public string Name => _name ?? string.Empty;
 
   /// <summary>
   /// Значение объекта
@@ -73,7 +73,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
   public void ThrowIfNotWaiting(string message = "This facility is no longer in standby mode")
   {
     if (!IsWaiting)
-      throw new ReadyableException(message, State, name);
+      throw new ReadyableException(message, State, _name);
   }
   void IReadyable<TValue>.ThrowIfNotWaiting() => ThrowIfNotWaiting();
 
@@ -85,7 +85,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
   public void ThrowIfNotReady(string message = "The object is not ready for use")
   {
     if (!IsReady)
-      throw new ReadyableException(message, State, name);
+      throw new ReadyableException(message, State, _name);
   }
   void IReadyable<TValue>.ThrowIfNotReady() => ThrowIfNotReady();
 
@@ -97,7 +97,7 @@ public class Readyable<TValue>(string? name = null) : IReadyable<TValue>
   public void ThrowIfNotInitialized(string message = "The object has not been initialized")
   {
     if (!IsInitialized)
-      throw new ReadyableException(message, State, name);
+      throw new ReadyableException(message, State, _name);
   }
   void IReadyable<TValue>.ThrowIfNotInitialized() => ThrowIfNotInitialized();  // Microsoft, добавьте реализацию сразу двух интерфейсных методов одним методом с необязательным параметром
 

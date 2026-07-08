@@ -4,12 +4,12 @@
 /// Атрибут для отметки пользовательского типа, требующего рефлексивный анализ
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
-public class ReflectionAttribute(BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly) : Attribute
+public class ReflectionAttribute(BindingFlags _flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly) : Attribute
 {
   /// <summary>
   /// Флаги для рефлексивного поиска
   /// </summary>
-  public BindingFlags Flags => flags;
+  public BindingFlags Flags => _flags;
 }
 
 /// <summary>

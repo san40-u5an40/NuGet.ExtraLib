@@ -3,18 +3,18 @@
 /// <summary>
 /// Исключение, ассоциированное с объектом, проверяемым на готовность
 /// </summary>
-/// <param name="message">Сообщение об ошибке</param>
-/// <param name="state">Состояние объекта</param>
-/// <param name="name">Имя объекта</param>
-public class ReadyableException(string? message = null, ReadyableState? state = null, string? name = null) : InvalidOperationException(message)
+/// <param name="_message">Сообщение об ошибке</param>
+/// <param name="_state">Состояние объекта</param>
+/// <param name="_name">Имя объекта</param>
+public class ReadyableException(string? _message = null, ReadyableState? _state = null, string? _name = null) : InvalidOperationException(_message)
 {
   /// <summary>
   /// Имя объекта
   /// </summary>
-  public string? Name => name;
+  public string? Name => _name;
 
   /// <summary>
   /// Состояние объекта
   /// </summary>
-  public ReadyableState? State => state;
+  public ReadyableState? State => _state;
 }
