@@ -3,7 +3,7 @@
 /// <summary>
 /// Счётчик
 /// </summary>
-public class Counter(long value = 0, string? name = null) : ICloneable, IComparable<Counter>
+public class Counter(long _value = 0, string? _name = null) : ICloneable, IComparable<Counter>
 {
   private static readonly int _randValueForHashCode = new Random().Next(int.MinValue, int.MaxValue);
   private readonly Lock _lockObj = new();
@@ -13,12 +13,19 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <summary>
   /// Значение счётчика
   /// </summary>
-  public long Value => value;
+  public long Value => Interlocked.Read(ref _value);
 
   /// <summary>
   /// Имя счётчика
   /// </summary>
-  public string Name => name ?? string.Empty;
+  public string Name
+  {
+    get
+    {
+      lock (_lockObj)
+        return _name ?? string.Empty;
+    }
+  }
 
   /// <summary>
   /// Установка валидатора допустимых значений
@@ -42,7 +49,15 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// </summary>
   public event CounterEventHandler Handler
   {
-    add => _observers.Add(value);
+    add
+    {
+      lock (_lockObj)
+      {
+        if (_observers.Contains(value))
+          throw new ArgumentException("the delegate is already contained in the collection");
+        _observers.Add(value);
+      }
+    }
     remove
     {
       lock (_lockObj)
@@ -62,11 +77,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   {
     lock (_lockObj)
     {
-      long newValue = value + 1;
+      long newValue = _value + 1;
 
-      if (long.MaxValue - 1 >= value && (_isValid is null || _isValid(newValue)))
+      if (long.MaxValue - 1 >= _value && (_isValid is null || _isValid(newValue)))
       {
-        value = newValue;
+        _value = newValue;
         UpdateObservers(CounterOperationType.Increment, 1);
       }
       else
@@ -85,11 +100,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   {
     lock (_lockObj)
     {
-      long newValue = value + step;
+      long newValue = _value + step;
 
-      if (long.MaxValue - step >= value && (_isValid is null || _isValid(newValue)))
+      if (long.MaxValue - step >= _value && (_isValid is null || _isValid(newValue)))
       {
-        value = newValue;
+        _value = newValue;
         UpdateObservers(CounterOperationType.Increment, step);
       }
       else
@@ -107,11 +122,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   {
     lock (_lockObj)
     {
-      long newValue = value - 1;
+      long newValue = _value - 1;
 
-      if (long.MinValue + 1 <= value && (_isValid is null || _isValid(newValue)))
+      if (long.MinValue + 1 <= _value && (_isValid is null || _isValid(newValue)))
       {
-        value = newValue;
+        _value = newValue;
         UpdateObservers(CounterOperationType.Decrement, 1);
       }
       else
@@ -130,11 +145,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   {
     lock (_lockObj)
     {
-      long newValue = value - step;
+      long newValue = _value - step;
 
-      if (long.MinValue + step <= value && (_isValid is null || _isValid(newValue)))
+      if (long.MinValue + step <= _value && (_isValid is null || _isValid(newValue)))
       {
-        value = newValue;
+        _value = newValue;
         UpdateObservers(CounterOperationType.Decrement, step);
       }
       else
@@ -157,7 +172,7 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// </summary>
   /// <returns>Новый счётчик</returns>
   public object Clone() =>
-      CreateCounter(value, name);
+      CreateCounter(_value, _name);
 
   /// <summary>
   /// Метод сравнения счётчиков
@@ -167,10 +182,11 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <exception cref="ArgumentNullException">В качестве значения для сравнения указан null</exception>
   public int CompareTo(Counter? counter)
   {
-    ArgumentNullException.ThrowIfNull(counter);
-
     lock (_lockObj)
+    {
+      ArgumentNullException.ThrowIfNull(counter);
       return Value.CompareTo(counter.Value);
+    }
   }
 
   /// <summary>
@@ -180,11 +196,12 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   /// <returns>Логическое значение, отражающее равны ли значения объектов</returns>
   public override bool Equals(object? obj)
   {
-    if (obj is not Counter counter)
-      return false;
-
     lock (_lockObj)
+    {
+      if (obj is not Counter counter)
+        return false;
       return (Value, Name) == (counter.Value, counter.Name);
+    }
   }
 
   /// <summary>
@@ -204,7 +221,7 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   public override string ToString()
   {
     lock (_lockObj)
-      return $"{(name is null ? string.Empty : name + ": ")}{value}";
+      return (_name is not null ? _name + ": " : string.Empty) + _value;
   }
 
   /// <summary>
@@ -300,7 +317,6 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   public static bool operator >=(Counter counter1, Counter? counter2)
   {
     int comparing = counter1.CompareTo(counter2);
-
     return comparing == 1 || comparing == 0;
   }
 
@@ -322,7 +338,6 @@ public class Counter(long value = 0, string? name = null) : ICloneable, ICompara
   public static bool operator <=(Counter counter1, Counter? counter2)
   {
     int comparing = counter1.CompareTo(counter2);
-
     return comparing == -1 || comparing == 0;
   }
 

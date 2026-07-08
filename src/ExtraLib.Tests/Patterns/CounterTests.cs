@@ -4,8 +4,8 @@
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class CounterTests
 {
-  private Counter counter1 = new(value: 0);
-  private readonly Counter counter2 = new(value: 20);
+  private Counter counter1 = new(_value: 0);
+  private readonly Counter counter2 = new(_value: 20);
 
   [Test]
   public void Increment_TestCounter_ReturnIncrementedValue()
