@@ -7,17 +7,11 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 
-		<AssemblyVersion>5.3.0.0</AssemblyVersion>
-		<FileVersion>5.3.0.0</FileVersion>
-		<Version>5.3.0</Version>
+		<AssemblyVersion>5.4.0.0</AssemblyVersion>
+		<FileVersion>5.4.0.0</FileVersion>
+		<Version>5.4.0</Version>
 		<PackageReleaseNotes>
-      Добавлены:
-        Опции для MessageBox.Show в ООП стилистике;
-        Метод Result.ExecuteAndExitIfNotValid;
-        Метод AddLoop для Chain и AsyncChain;
-
-      Изменены:
-        Убрана лишние мониторы синхронизации из Chain и AsyncChain
+      Улучшена потокобезопасность Counter
 		</PackageReleaseNotes>
 
 		<Title>Extra Libraries</Title>
